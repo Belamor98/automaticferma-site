@@ -32,6 +32,10 @@
       'discord.news.key': 'Новости и апдейты',
       'discord.news.val': 'первыми',
       'discord.join': 'Присоединиться',
+      'video.title': 'Видео-превью <span class="amber">фермы</span>',
+      'video.sub': 'Смотри, как AutomaticFermaPro фармит Roblox — без детекта и банов.',
+      'video.caption.title': 'preview Roblox Farm',
+      'video.caption.sub': 'не детект метод · полный автоматик',
       'features.title': 'Что внутри',
       'features.sub': 'Каждый модуль включается тумблером — ферма собирается под вашу схему.',
       'feature.yummyauto.title': 'YummyAuto-консоль',
@@ -112,6 +116,10 @@
       'discord.news.key': 'News & updates',
       'discord.news.val': 'first',
       'discord.join': 'Join server',
+      'video.title': 'Farm <span class="amber">video preview</span>',
+      'video.sub': 'Watch AutomaticFermaPro farm Roblox — no detection, no bans.',
+      'video.caption.title': 'preview Roblox Farm',
+      'video.caption.sub': 'not detect method · full automatic',
       'features.title': "What's inside",
       'features.sub': 'Every module toggles on — build the farm to your scheme.',
       'feature.yummyauto.title': 'YummyAuto console',
@@ -215,6 +223,27 @@
     });
   }
 
+  // ▶️ Видео-превью: клик — подгружаем YouTube-iframe с автоплеем
+  function initVideoFacade() {
+    var frame = document.getElementById('video-frame');
+    if (!frame) return;
+    function play() {
+      var id = frame.getAttribute('data-youtube');
+      if (!id || frame.querySelector('iframe')) return;
+      var iframe = document.createElement('iframe');
+      iframe.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0';
+      iframe.title = 'preview Roblox Farm (not detect method)';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      frame.innerHTML = '';
+      frame.appendChild(iframe);
+    }
+    frame.addEventListener('click', play);
+    frame.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); play(); }
+    });
+  }
+
   // 🖼️ Демо-фрейм: iframe ровно 1080×1050 (стартовый размер окна приложения),
   // масштабируется под ширину контейнера — пропорции как на ПК
   function fitDemoFrame() {
@@ -234,6 +263,7 @@
   });
 
   applyLang(getLang());
+  initVideoFacade();
   fitDemoFrame();
   window.addEventListener('resize', fitDemoFrame);
   window.addEventListener('load', fitDemoFrame);
