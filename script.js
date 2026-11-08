@@ -16,7 +16,7 @@
       'demo.sub': 'Попробуйте панель управления: тумблеры, шестерёнки, вкладки, старт/стоп — всё работает прямо в браузере.',
       'hero.badge': 'Desktop-приложение для Windows · Build v1.2',
       'hero.title': 'Мульти-ферма Roblox<br>под <span class="amber">полным контролем</span>',
-      'hero.lead': 'AutomaticFermaPro объединяет десятки аккаунтов в одну панель: смена IP/MAC по слотам, Anti-AFK, Solver, Watchdog и боты для Discord и Telegram. Работает, пока вы спите.',
+      'hero.lead': 'AutomaticFermaPro автоматизирует фарм десятка аккаунтов: смена IP/MAC по слотам, Anti-AFK, Solver, Watchdog и боты для Discord и Telegram. Работает, пока вы спите.',
       'hero.cta1': 'Получить ключ',
       'hero.cta2': 'Возможности',
       'hero.stat1.value': '12+',
@@ -82,7 +82,6 @@
       'faq.a4': 'Ограничение — только ресурсы вашего ПК. RAM Boost и Watchdog следят, чтобы ферма не деградировала.',
       'download.title': 'Готовы автоматизировать ферму?',
       'download.sub': 'Свяжитесь с нами, чтобы получить ключ и сборку для Windows.',
-      'download.tg': 'Написать в Telegram',
       'download.discord': 'Наш Discord',
       'footer.copy': '© 2026 AutomaticFermaPro · automaticferma.bid',
       'footer.dim': 'Не аффилировано с Roblox Corporation'
@@ -99,7 +98,7 @@
       'demo.sub': 'Try the control panel: toggles, gears, tabs, start/stop — all work right in the browser.',
       'hero.badge': 'Desktop app for Windows · Build v1.2',
       'hero.title': 'Roblox multi-farm<br>under <span class="amber">full control</span>',
-      'hero.lead': 'AutomaticFermaPro unites dozens of accounts in one panel: per-slot IP/MAC swap, Anti-AFK, Solver, Watchdog and bots for Discord and Telegram. Works while you sleep.',
+      'hero.lead': 'AutomaticFermaPro automates farming of dozens of accounts: per-slot IP/MAC swap, Anti-AFK, Solver, Watchdog and bots for Discord and Telegram. Works while you sleep.',
       'hero.cta1': 'Get key',
       'hero.cta2': 'Features',
       'hero.stat1.value': '12+',
@@ -165,7 +164,6 @@
       'faq.a4': 'Limited only by your PC\'s resources. RAM Boost and Watchdog keep the farm from degrading.',
       'download.title': 'Ready to automate your farm?',
       'download.sub': 'Contact us to get a key and Windows build.',
-      'download.tg': 'Message on Telegram',
       'download.discord': 'Our Discord',
       'footer.copy': '© 2026 AutomaticFermaPro · automaticferma.bid',
       'footer.dim': 'Not affiliated with Roblox Corporation'

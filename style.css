@@ -193,6 +193,7 @@ a { color: var(--accent-amber); text-decoration: none; }
 .hero-stats { justify-content: center; }
 
 .badge {
+  align-self: flex-start;
   display: inline-block;
   padding: 6px 14px;
   border-radius: 999px;
