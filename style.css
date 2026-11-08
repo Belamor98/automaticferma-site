@@ -346,7 +346,7 @@ a { color: var(--accent-amber); text-decoration: none; }
 .video-frame {
   position: relative;
   max-width: 1080px;
-  margin: 0 auto;
+  margin: 34px auto 0;
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid var(--accent-amber-border);
