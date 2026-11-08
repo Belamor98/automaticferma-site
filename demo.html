@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!-- 🛡️ CSP: страница не должна исполнять сторонние/инъецированные скрипты
+         (окно работает с nodeIntegration, поэтому XSS = RCE).
+         Инлайн-скрипты разрешены только по nonce, инлайн-обработчики
+         событий (onclick/onerror) заблокированы. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file: 'nonce-ferma-inline-2026'; style-src 'self' file: 'unsafe-inline'; img-src 'self' file: data: blob:; font-src 'self' file: data:; media-src 'self' file: data: blob:; connect-src 'self' file: data: blob:; object-src 'none'; base-uri 'none'; form-action 'none';">
+    <title>AutomaticFerma Pro</title>
+    <link rel="stylesheet" href="app-style.css">
+    <link rel="stylesheet" href="discord-styles.css">
+    <link rel="stylesheet" href="modules/cookie-checker/styles-scoped.css">
+</head>
+<body>
+
+    <!-- 🪟 ШАПКА = СВОЯ СТРОКА ЗАГОЛОВКА WINDOWS (drag + свои кнопки) -->
+    <div class="header app-titlebar">
+        <div class="app-titlebar-drag">
+            <svg class="brand-emblem" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <defs>
+                    <linearGradient id="afGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#fde68a"/>
+                        <stop offset="50%" stop-color="#fbbf24"/>
+                        <stop offset="100%" stop-color="#d97706"/>
+                    </linearGradient>
+                </defs>
+                <path d="M24 3.5 43 11.5v13.2c0 9.4-7.6 15.9-19 19.8-11.4-3.9-19-10.4-19-19.8V11.5L24 3.5Z"
+                      fill="rgba(251,191,36,0.06)" stroke="url(#afGrad)" stroke-width="2.4" stroke-linejoin="round"/>
+                <path d="M27.2 11.5 15.8 27.2h6.9L20.6 38l12.4-16.4h-7.2l1.4-10.1Z" fill="url(#afGrad)"/>
+            </svg>
+            <h1 id="app-main-title">Automatic<em>FermaPro</em></h1>
+        </div>
+        <span class="app-ver">Build v1.2</span>
+        <div class="app-titlebar-controls">
+            <select id="lang-select" class="lang-select" data-tooltip="Language">
+                <option value="ru">Русский</option>
+                <option value="en">English</option>
+            </select>
+            <button class="titlebar-btn" id="titlebar-min" data-tooltip="Свернуть">—</button>
+            <button class="titlebar-btn" id="titlebar-max" data-tooltip="Развернуть / восстановить">▢</button>
+            <button class="titlebar-btn titlebar-btn-close" id="titlebar-close" data-tooltip="Закрыть">✕</button>
+        </div>
+    </div>
+
+    <div class="tabs-nav">
+        <button class="tab-btn active" id="menu-btn-start">Start</button>
+        <button class="tab-btn" id="menu-btn-software">SoftWare</button>
+        <button class="tab-btn" id="menu-btn-webhook">WebHook</button>
+        <button class="tab-btn" id="menu-btn-yummy">Console Launcher</button>
+        <button class="tab-btn" id="menu-btn-console">Console</button>
+        <button class="tab-btn" id="menu-btn-solver">Solver</button>
+        <button class="tab-btn" id="menu-btn-cookiechecker">Cookie Checker</button>
+        <button class="tab-btn" id="menu-btn-license">🔑 Key</button>
+        <button class="tab-gear" id="tabs-gear-btn" title="Скрыть вкладки">⚙</button>
+    </div>
+    <div id="tabs-gear-menu" class="tabs-gear-menu" style="display: none;"></div>
+
+    <!-- ===== ВКЛАДКА START ===== -->
+    <div id="block-start" class="tab-content active">
+        <div class="grid">
+            <div class="card" style="justify-content: flex-start;">
+                <h3>Параметры сессии</h3>
+                <!-- flex: 1 убран: колонка больше не растягивается, поэтому
+                     кнопки СТАРТ/СТОП не отталкиваются к низу карточки -->
+                <div style="display: flex; flex-direction: column; width: 100%; box-sizing: border-box;">
+                    <div class="cookie-manager-wrapper" id="cookie-manager-wrapper">
+                        <div class="cookie-manager-header">
+                            <span class="cookie-manager-title">COOKIE МЕНЕДЖЕР</span>
+                        </div>
+                        <button class="btn-zeropoint" id="btn-zeropoint" data-tooltip="ZeroPoint: API-ключи (Cookie Checker / ZeroUnlock / GetCookie / ZeroSolver)">🔑 ZeroPoint API</button>
+                        <div class="cookie-packs-list" id="cookie-packs-list"></div>
+                        <button class="btn-create-new-pack-short" id="btn-add-pack">+ Добавить Cookie</button>
+                    </div>
+
+                    <div class="controls-panel-wrapper">
+                        <div class="controls-row">
+                            <button class="mod-btn mod-btn-off mod-btn-no-gear" id="btn-toggle-solver-mini" data-tooltip="Решатель капчи">
+                                <span class="mod-label">🧩 Solver</span>
+                                <span class="mod-state">Off</span>
+                                <span class="mod-gear">⚙</span>
+                            </button>
+                            <button class="mod-btn mod-btn-off" id="btn-toggle-antiafk-mini" data-tooltip="Эмитирует человека">
+                                <span class="mod-label">🖱️ Anti-AFK</span>
+                                <span class="mod-state">Off</span>
+                                <span class="mod-gear" id="gear-antiafk">⚙</span>
+                            </button>
+                        </div>
+                        <div class="controls-row">
+                            <button class="mod-btn mod-btn-off" id="btn-toggle-farmtimer-mini" data-tooltip="Многофункциональный модуль для настройки режимов фарма">
+                                <span class="mod-label">⏱️ FarmTimer</span>
+                                <span class="mod-state">Off</span>
+                                <span class="mod-gear" id="gear-farmtimer">⚙</span>
+                            </button>
+                            <button class="mod-btn mod-btn-off" id="btn-toggle-ramboost-mini" data-tooltip="Очищает мусор из RAM">
+                                <span class="mod-label">🚀 RAM Boost</span>
+                                <span class="mod-state">Off</span>
+                                <span class="mod-gear" id="gear-ramboost">⚙</span>
+                            </button>
+                        </div>
+                        <div class="controls-row">
+                            <button class="mod-btn mod-btn-off mod-btn-wide" id="btn-toggle-watchdog" data-tooltip="Перезапустит приложение, если оно зависнет или вылетит">
+                                <span class="mod-label">🛡️ Watchdog</span>
+                                <span class="mod-state">Off</span>
+                            </button>
+                            <button class="mod-btn mod-btn-telegram mod-btn-off" id="btn-toggle-telegram" data-tooltip="Подключи Телеграм бота, управляй фермой дистанционно">
+                                <span class="mod-label">📱 Telegram</span>
+                                <span class="mod-state">Off</span>
+                                <span class="mod-gear" id="gear-telegram">⚙</span>
+                            </button>
+                        </div>
+<div class="controls-row">
+                            <button class="mod-btn mod-btn-off" id="btn-toggle-voltauth" data-tooltip="Следит за тем, чтобы VOLT не разлогинился (BETA)">
+                                <span class="mod-label">🔐 VoltLogin</span>
+                                <span class="mod-state">Off</span>
+                                <span class="mod-gear" id="gear-voltauth">⚙</span>
+                            </button>
+                            <button class="mod-btn mod-btn-off mod-btn-spoofer" id="btn-spoofer" data-tooltip="Зажмите 5 секунд — полная чистка системы">
+                                <span class="mod-label">🧬 Spoofer</span>
+                                <span class="mod-state">Hold 5s</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="status-bar-start">
+                        <span class="label-wrap">
+                            <span class="label">Цикл.</span>
+                            <span class="time-current" id="status-pack-time-start">0</span>
+                            <span class="time-separator">/</span>
+                            <span class="time-total" id="status-pack-total-start">240</span>
+                        </span>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="status-progress-fill-start" style="width: 0%;"></div>
+                        </div>
+                        <span class="percent" id="status-percent-start">0%</span>
+                    </div>
+
+                    <div class="status-card" id="status-card">
+                        <div class="status-card-header">
+                            <span class="status-card-title">ТЕКУЩИЙ СТАТУС СЕАНСА</span>
+                        </div>
+                        <div class="status-card-body">
+                            <div class="status-card-row">
+                                <span class="status-card-label">Статус:</span>
+                                <span class="status-card-value status-card-status status-offline" id="status-text-card">OFFLINE</span>
+                            </div>
+                            <div class="status-card-row-instances">
+                                <span class="status-card-label-instances">Инстансы:</span>
+                                <div class="status-card-instances">
+                                    <span class="status-card-instance total">Total: <span id="status-roblox-total-card">0</span></span>
+                                    <span class="status-card-instance online" id="status-online-label">
+                                        Online: <span id="status-roblox-online-card">0</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="status-card-row-services">
+                                <div class="status-card-service">
+<span class="status-card-service-label">Louncher:</span>
+<span class="status-card-service-value offline" id="status-yammi-card">OFFLINE</span>
+                                </div>
+                                <div class="status-card-service">
+                                    <span class="status-card-service-label">Volt:</span>
+                                    <span class="status-card-service-value offline" id="status-volt-card">OFFLINE</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: none;" id="solver-bottom-center">
+                        <button class="toggle-switch-btn state-off" id="btn-toggle-solver" style="width: 100%; max-width: 220px;">Solver Off</button>
+                    </div>
+                </div>
+
+                <div class="btn-actions-centered glass-actions">
+                    <button class="btn-glass btn-glass-start" id="btn-start-farm">
+                        <span class="btn-glass-icon">▶️</span>
+                        <span class="btn-glass-label">СТАРТ</span>
+                        <span class="btn-glass-sub">Запустить ферму</span>
+                        <span class="btn-start-gear" id="btn-start-gear" data-tooltip="Настройки запуска">⚙</span>
+                    </button>
+                    <button class="btn-glass btn-glass-stop" id="btn-stop-farm">
+                        <span class="btn-glass-icon">⏹️</span>
+                        <span class="btn-glass-label">СТОП</span>
+                        <span class="btn-glass-sub">Остановить ферму</span>
+                        <span class="btn-stop-gear" id="btn-stop-gear" data-tooltip="Настройки остановки">⚙</span>
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; height: 100%;">
+                <div class="card" style="flex: 1; min-height: 100%; display: flex; flex-direction: column;">
+                    <h3>Очередь и расписание пачек</h3>
+                    <div class="queue-container" id="queue-packs-container" style="max-height: 192px; overflow-y: auto; flex: 0 0 auto;">
+                        <div class="queue-empty-msg">Добавьте пачки куки, чтобы увидеть queue</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px;">
+                        <button class="btn-clear-cookie-backup" id="btn-clear-cookie-backups" data-tooltip="Удалить бэкап куки только для аккаунтов выбранной пачки">Удалить бекап</button>
+                        <button class="btn-get-cookie" id="btn-get-cookie" data-tooltip="Авторизует все аккаунты из списка, и глобализирует их">🔄 GetCookie</button>
+                        <span id="getcookie-status" style="font-size: 10px; color: #94a3b8; min-width: 80px;"></span>
+                        <h3 style="margin: 0; flex: 1; text-align: center; font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: none; letter-spacing: 0.5px;">Список аккаунтов Cookie #<span id="accounts-pack-id">—</span></h3>
+                        <button id="accounts-refresh-btn" data-tooltip="Обновить состояние" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 16px; padding: 2px 6px;">↻</button>
+                    </div>
+                    <div class="accounts-container" id="accounts-list-container" style="flex: 1; overflow-y: auto; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(251, 191, 36, 0.08); border-radius: 10px; padding: 8px; box-sizing: border-box; position: relative;">
+                        <div class="queue-empty-msg">Нет данных</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ВКЛАДКА SOFTWARE ===== -->
+    <div id="block-software" class="tab-content">
+        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+            <div class="card" style="width: 100%; max-width: 600px; height: auto;">
+                <h3>Пути к исполняемым файлам</h3>
+                <div class="path-container">
+                    <span style="font-size: 12px; color: #94a3b8; margin-bottom: 4px; margin-top: 8px;">Volt (tauri-app.exe)</span>
+                    <div class="path-row">
+                        <div class="path-input-wrapper">
+                            <input type="text" id="path-volt-input" readonly placeholder="Путь не выбран...">
+                            <div class="status-indicator" id="ind-volt">✗</div>
+                        </div>
+                        <button class="btn-browse" data-key="voltExe" data-input="path-volt-input">Выбрать файл</button>
+                    </div>
+
+                    <span style="font-size: 12px; color: #94a3b8; margin-bottom: 4px; margin-top: 8px;">Solver (app.exe / ZeroAutoSolve.Terminal.exe)</span>
+                    <div class="path-row">
+                        <div class="path-input-wrapper">
+                            <input type="text" id="path-solver-input" readonly placeholder="Путь не выбран...">
+                            <div class="status-indicator" id="ind-solver">✗</div>
+                        </div>
+                        <button class="btn-browse" data-key="solverDir" data-input="path-solver-input">Выбрать файл</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ВКЛАДКА WEBHOOK ===== -->
+    <div id="block-webhook" class="tab-content">
+        <div class="card discord-webhook-page">
+            <h3>🤖 Discord WebHook — мониторинг аккаунтов</h3>
+            <div class="discord-webhook-container">
+                <div class="discord-subtabs">
+                    <button class="discord-subtab active" data-filter="all" id="tab-all">📋 Все</button>
+                    <button class="discord-subtab banned" data-filter="banned" id="tab-banned">
+                        Banned
+                        <span class="badge-banned" id="badge-banned">0</span>
+                    </button>
+                </div>
+                <div class="discord-status-bar">
+                    <span class="discord-status-label">⚙ СТАТУС:</span>
+                    <span class="discord-status-icon offline" id="discord-status-icon">❌</span>
+                    <span class="discord-status-spacer"></span>
+                    <button class="discord-mod-btn discord-mod-off" id="btn-toggle-discord">
+                        <span id="discord-mod-text">Подключить поток</span>
+                        <span class="mod-gear" id="discord-gear-btn">⚙</span>
+                    </button>
+                </div>
+                <div id="discord-tab-all" class="discord-tab-content active">
+                    <div class="discord-tab-header">
+                        <span class="discord-tab-title">📋 СПИСОК АККАУНТОВ</span>
+                    </div>
+                    <div class="discord-accounts-list" id="discord-accounts-list">
+                        <div class="discord-empty-msg">Ожидание данных от Discord...</div>
+                    </div>
+                    <div class="discord-clear-buttons">
+                        <button class="btn-clear-list" id="btn-clear-all-accounts">🗑️ Очистить список</button>
+                    </div>
+                </div>
+                <div id="discord-tab-banned" class="discord-tab-content">
+                    <!-- 🛑 Тумблер в едином стиле фермы (как в Smart-Swap) — сверху, перед списком -->
+                    <div class="cleaner-row" style="margin-top: 0; margin-bottom: 12px;">
+                        <div class="cleaner-info">
+                            <div class="cleaner-label">Останавливать ферму при Shadow Ban</div>
+                            <div class="cleaner-sub">
+                                Если обнаружен бан — ферма остановится автоматически
+                            </div>
+                        </div>
+                        <div class="cleaner-toggle" id="btn-discord-stop-on-ban"></div>
+                    </div>
+                    <div class="discord-tab-header">
+                        <span class="discord-tab-title">🚫 БАН-ЛИСТ</span>
+                    </div>
+                    <div class="discord-accounts-list" id="discord-banned-list">
+                        <div class="discord-empty-msg">Нет забаненных аккаунтов</div>
+                    </div>
+                    <div class="discord-clear-buttons">
+                        <button class="btn-clear-list" id="btn-remove-banned-cookies" data-tooltip="Удалить куки всех аккаунтов из бан-листа из пачек (Pack*.txt)">🍪 Удалить куки забаненных из пачки</button>
+                        <button class="btn-clear-list" id="btn-clear-banned">🗑️ Очистить бан-лист</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ВКЛАДКА CONSOLE ===== -->
+    <div id="block-console" class="tab-content">
+        <div class="card" style="height: 100%; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-shrink: 0;">
+                <h3 style="margin: 0;" id="console-title">Основная консоль фермы</h3>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div id="dev-mode-block" style="display: flex; align-items: center; gap: 8px;" data-tooltip="Режим разработчика: весь вывод main-процесса, как в терминале VS Code">
+                        <span style="font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;">🛠️ Режим разработчика</span>
+                        <div class="cleaner-toggle" id="btn-dev-mode"></div>
+                    </div>
+                    <div class="discord-clear-buttons" style="margin-top: 0;">
+                        <button class="btn-clear-list" id="btn-clear-main-console">🗑️ Очистить консоль</button>
+                        <button class="btn-clear-list" id="btn-clear-dev-console" style="display: none;">🗑️ Очистить</button>
+                    </div>
+                </div>
+            </div>
+            <div id="console-sticky-timers">
+                <span class="label-wrap">
+                    <span class="label">Цикл.</span>
+                    <span class="time-current" id="sticky-pack-time">0</span>
+                    <span class="time-separator">/</span>
+                    <span class="time-total" id="sticky-time-total">240</span>
+                </span>
+                <div class="progress-track">
+                    <div class="progress-fill" id="sticky-progress-fill" style="width: 0%;"></div>
+                </div>
+                <span class="percent" id="sticky-percent">0%</span>
+            </div>
+            <!-- Та же обёртка, что на вкладках WebHook/Yummy: низ ровный.
+                 calc(100% - 83px): 35px шапки + ~38px блока таймеров + 10px отступ -->
+            <div class="log-box-wrapper" id="console-log-wrapper" style="height: calc(100% - 83px); min-height: calc(100% - 83px); max-height: calc(100% - 83px); margin-bottom: 10px;">
+                <div class="log-box" id="main-log-box">
+                    <div class="log-entry"><span class="log-time">[system]</span> Ожидание системных событий фермы...</div>
+                </div>
+            </div>
+
+            <!-- 🛠️ Консоль разработчика: весь вывод main-процесса, как в терминале -->
+            <div class="log-box-wrapper" id="dev-log-wrapper" style="display: none; height: calc(100% - 83px); min-height: calc(100% - 83px); max-height: calc(100% - 83px); margin-bottom: 10px;">
+                <div class="log-box dev-log" id="dev-log-box">
+                    <div class="log-entry"><span class="dev-time">[dev]</span><span class="dev-lvl dev-lvl-log">Ожидание вывода main-процесса (console.log/warn/error)...</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ВКЛАДКА CONSOLE LAUNCHER ===== -->
+    <div id="block-yummy" class="tab-content">
+        <div class="card" style="height: 100%; position: relative; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; gap: 6px; align-items: center;">
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button id="cl-gear" type="button" style="font-size: 16px; background: transparent; border: none; color: #fbbf24; cursor: pointer; transition: transform 0.3s ease; padding: 0;">⚙</button>
+                    <span id="cl-gear-label" class="settings-modal-title settings-modal-title-amber" style="font-size: 14px; cursor: pointer;">Настройка лаунчера</span>
+                </div>
+                <div style="display: flex; justify-content: flex-end; flex-shrink: 0;">
+                    <button id="cl-arrange" type="button" class="mod-btn mod-btn-off" style="flex: 0; min-height: 28px; padding: 4px 12px; font-size: 12px; white-space: nowrap;">Сортировать окна</button>
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-shrink: 0;">
+            </div>
+            <div class="log-box-wrapper" style="flex: 1; min-height: 0;">
+                <div class="log-box" id="cl-log-box">
+                    <div class="log-entry"><span class="log-time">[system]</span> Console Launcher готов</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ВКЛАДКА SOLVER ===== -->
+    <div id="block-solver" class="tab-content">
+        <div class="card" style="height: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0;">
+                <h3 style="margin: 0;">Консоль SOLVER</h3>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;" data-tooltip="Для app.exe, вставь куки на которых хочешь решать капчу, этот режим игнорирует автоматическую перезапись">
+                        <div class="cleaner-toggle" id="btn-toggle-manual"></div>
+                        <span style="font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;">Manual</span>
+                    </div>
+                    <button class="tab-btn active" id="btn-manual-cookie" style="height: 26px; padding: 0 14px; font-size: 11px; margin: 0; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);" data-tooltip="Куки для Manual-режима (accounts.txt)">Cookie</button>
+                </div>
+            </div>
+            <div class="log-box-wrapper" id="solver-log-wrapper" style="border: 2px solid transparent; border-radius: 14px; transition: all 0.3s;">
+                <div class="log-box" id="solver-log-box">
+                    <div class="log-entry"><span class="log-time">[system]</span> Ожидание потока данных Капча-Сольвера...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ВКЛАДКА COOKIE CHECKER ===== -->
+    <div id="block-cookiechecker" class="tab-content">
+        <div class="card" style="height: 100%; position: relative;">
+            <div style="display: flex; align-items: center; margin-bottom: 12px; flex-shrink: 0; position: relative;">
+                <h3 style="margin: 0; padding: 12px 0 12px 12px;">RBX Cookie Checker</h3>
+                <section class="copy-row" style="position: absolute; top: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; margin: 0; padding: 0;">
+                    <button id="btnCopyLive" class="btn copy-btn t-live" disabled>Alive <span id="cLive">0</span></button>
+                    <button id="btnCopyLock" class="btn copy-btn t-lock" disabled>CapLock <span id="cLock">0</span></button>
+                    <button id="btnCopyJoin" class="btn copy-btn t-join" disabled>JoinGameCaptcha <span id="cJoin">0</span></button>
+                    <button id="btnCopyFaceLock" class="btn copy-btn t-face" disabled>FaceLock <span id="cFaceLock">0</span></button>
+                    <button id="btnCopyBanned" class="btn copy-btn t-ban" disabled>Banned <span id="cBanned">0</span></button>
+                </section>
+            </div>
+            <div class="table-wrap" style="flex: 1; min-height: 0; overflow: auto; margin-top: 8px;">
+                <table class="results">
+                    <thead>
+                        <tr>
+                            <th class="th-num">#</th>
+                            <th class="th-nick">Ник</th>
+                            <th class="th-status">Статус</th>
+                            <th>Куки</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody"></tbody>
+                </table>
+            </div>
+        <footer class="bottombar">
+            <button id="btnOpenCookies" class="btn btn-primary btn-cookies" style="height: 26px; padding: 0 8px; font-size: 11px; margin: 0; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);" data-tooltip="Куки для проверки">Cookie</button>
+            <button id="btnStop" class="btn cc-close-btn" disabled style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 43px; padding: 0; transition: all 0.2s ease; line-height: 1;">×</button>
+        </footer>
+        </div>
+        <div class="modal-overlay" id="cookieModal" style="display: none;">
+            <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-head">
+                <h2>Куки для проверки</h2>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button id="btnCcSettings" class="btn btn-icon" title="Настройки" style="font-size: 16px;">⚙</button>
+                    <button id="btnCloseModal" class="btn btn-icon" title="Закрыть">✕</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="paste-zone">
+                    <div class="line-numbers" id="lineNumbers" aria-hidden="true">1</div>
+                    <textarea id="cookieInput" spellcheck="false" wrap="off" placeholder="вставь куки — по одной на строку"></textarea>
+                </div>
+                <div id="ccSettingsPanel" style="display: none; margin-top: 12px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(251,191,36,0.15);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <label style="font-size: 12px; color: #94a3b8; min-width: 90px;">Only Captcha:</label>
+                    <label style="position: relative; display: inline-block; width: 40px; height: 20px;">
+                        <input type="checkbox" id="ccOnlyCaptcha" style="opacity: 0; width: 0; height: 0;">
+                        <span id="ccOnlyCaptchaSlider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.1); border-radius: 20px; transition: 0.3s;"></span>
+                    </label>
+                    <span style="font-size: 11px; color: #64748b;">Только капча v1/v2 (join-game)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <label style="font-size: 12px; color: #94a3b8; min-width: 90px;">Воркеры:</label>
+                        <input type="range" id="ccWorkers" min="1" max="5" value="1" style="flex: 1; accent-color: #fbbf24;">
+                        <span id="ccWorkersVal" style="font-size: 12px; color: #fbbf24; min-width: 20px; text-align: center;">1</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <label style="font-size: 12px; color: #94a3b8; min-width: 90px;">Задержка (сек):</label>
+                        <input type="range" id="ccDelay" min="0.1" max="10" step="0.1" value="1.5" style="flex: 1; accent-color: #fbbf24;">
+                        <span id="ccDelayVal" style="font-size: 12px; color: #fbbf24; min-width: 30px; text-align: center;">1.5</span>
+                    </div>
+                </div>
+            </div>
+                <div class="modal-foot">
+                    <button id="btnClearCookies" class="btn">Очистить</button>
+                    <div class="spacer"></div>
+                    <button id="btnCancelModal" class="btn">Отмена</button>
+                    <button id="btnModalStart" class="btn btn-primary">Проверить</button>
+                </div>
+            </div>
+        </div>
+        <div class="toast-host" id="toastHost"></div>
+    </div>
+
+    <!-- ===== ВКЛАДКА LICENSE ===== -->
+    <div id="block-license" class="tab-content">
+        <div class="license-wrapper">
+            <div class="license-card">
+                <div class="license-card-header">
+                    <span>Key</span>
+                </div>
+                <div class="license-card-body">
+                    <div id="license-status-area">
+                        <div class="license-row">
+                            <span class="license-label">Status</span>
+                            <span id="license-status-badge" class="license-badge unregistered">UNREGISTERED</span>
+                        </div>
+                        <div class="license-row">
+                            <span class="license-label">Key Type</span>
+                            <span id="license-key-type" class="license-value">-</span>
+                        </div>
+                        <div class="license-row">
+                            <span class="license-label">Expires</span>
+                            <span id="license-expires" class="license-value">-</span>
+                        </div>
+                        <div class="license-row">
+                            <span class="license-label">HWID</span>
+                            <span id="license-hwid" class="license-value license-hwid">-</span>
+                        </div>
+                    </div>
+                    <div id="license-register-area" class="license-register">
+                        <div class="license-divider"></div>
+                        <label class="license-input-label">Enter your activation key</label>
+                        <div class="license-input-group">
+                            <input type="text" id="license-key-input" class="license-input" placeholder="FERMA-...">
+                            <button id="btn-license-activate" class="license-activate-btn">Activate</button>
+                        </div>
+                        <div id="license-msg" class="license-msg"></div>
+                    </div>
+                    <div class="license-divider"></div>
+                    <div class="license-reset-row">
+                        <div class="license-reset-info">
+                            <span class="license-reset-label">Hardware ID Reset</span>
+                            <span id="license-reset-cooldown" class="license-reset-cooldown">Available once per 24h</span>
+                        </div>
+                        <div class="license-reset-btn-wrap">
+                            <button id="btn-license-reset-hwid" class="mod-btn mod-btn-off mod-btn-spoofer license-reset-small" disabled data-tooltip="Зажмите 5 секунд — сброс HWID">
+                                <span class="mod-label">Reset HWID</span>
+                            </button>
+                            <span class="license-reset-hint">Hold 5 sec</span>
+                        </div>
+                    </div>
+                    <div class="license-price-section">
+                        <span class="license-price-title">Price</span>
+                        <div class="license-row">
+                            <span class="license-label">7 дней</span>
+                            <span class="license-price-value">—</span>
+                        </div>
+                        <div class="license-row">
+                            <span class="license-label">30 дней</span>
+                            <span class="license-price-value">—</span>
+                        </div>
+                        <div class="license-row">
+                            <span class="license-label">90 дней</span>
+                            <span class="license-price-value">—</span>
+                        </div>
+                    </div>
+                    <div class="license-divider"></div>
+                    <div class="license-buy-row">
+                        <div class="license-buy-info">
+                            <span class="license-buy-label">Купить ключ</span>
+                            <span class="license-buy-discord">Discord: <b>dota_sng</b></span>
+                        </div>
+                        <button id="btn-license-buy-discord" class="license-buy-btn" data-tooltip="Нажми — откроется Discord">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 00.031.056 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028 14.09 14.09 0 001.226-1.994.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.291.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.3 12.3 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.84 19.84 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
+                            <span>Купить ключ</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="license-messages-panel" class="license-messages-panel" style="display: none;">
+                <div class="license-msg-card">
+                    <div class="license-msg-card-header">📨 Messages from Admin</div>
+                    <div id="license-messages-list" class="license-msg-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА FARM TIMER (ОБНОВЛЕНА) ===== -->
+    <div class="settings-modal-overlay" id="farmtimer-modal-overlay">
+        <div class="settings-modal settings-modal-amber" style="width: 560px;">
+            <div class="settings-modal-header settings-modal-header-amber">
+                <span class="settings-modal-title settings-modal-title-amber">⚙ НАСТРОЙКИ FARM TIMER</span>
+                <button class="settings-modal-close" id="farmtimer-modal-close">✕</button>
+            </div>
+            <div class="settings-modal-body">
+
+                <div id="timer-section">
+                    <div class="settings-modal-row settings-modal-row-center" id="queue-mode-row">
+                        <label class="settings-modal-checkbox">
+                            <input type="checkbox" id="farmtimer-queue-mode">
+                            <span class="settings-modal-checkmark"></span>
+                            Фармить по очереди (без отдыха)
+                        </label>
+                    </div>
+                    <div class="settings-modal-divider"></div>
+                    <div class="settings-modal-row settings-modal-row-center" id="farmtimer-work-row">
+                        <span class="settings-modal-label">⏱️ Работа (ч):</span>
+                        <input type="number" class="settings-modal-input" id="farmtimer-work-input" value="4" min="0.1" max="24" step="0.1" style="width: 70px;">
+                    </div>
+                </div>
+
+                <div class="settings-modal-row settings-modal-row-center" id="farmtimer-rest-row">
+                    <span class="settings-modal-label">😴 Отдых (мин):</span>
+                    <input type="number" class="settings-modal-input" id="farmtimer-rest-input" value="8" min="1" max="20" step="1" style="width: 70px;">
+                </div>
+                <div style="font-size: 11px; color: #64748b; text-align: center; margin-top: 4px;" id="farmtimer-hint">
+                    С галочкой пачки фармятся по очереди без отдыха
+                </div>
+
+                <div class="settings-modal-divider"></div>
+
+                <div class="smart-swap-block" id="smart-swap-block">
+                    <div class="smart-swap-header" id="smart-swap-header">
+                        <div class="smart-swap-header-left">
+                            <span class="smart-swap-arrow">▶</span>
+                            <span class="smart-swap-title">🌐 СМЕНА IP + ГИБКИЙ ГРАФИК ФАРМА</span>
+                        </div>
+                        <div class="smart-swap-toggle" id="smart-swap-toggle"></div>
+                    </div>
+
+                    <div class="smart-swap-body">
+                        <div class="smart-swap-inner">
+                            <div class="slider-section">
+                                <div class="slider-header">
+                                    <span class="slider-label">🔢 Количество циклов</span>
+                                    <span class="slider-value" id="smart-cycles-value">3</span>
+                                </div>
+                                <input type="range" id="smart-cycles-slider" min="1" max="20" value="3" step="1">
+                                <div class="slider-labels">
+                                    <span>1</span>
+                                    <span>20</span>
+                                </div>
+                            </div>
+
+                            <div class="slot-table-header">
+                                <span>#</span>
+                                <span class="col-work">Work</span>
+                                <span class="col-end">END</span>
+                                <span class="col-pack">Пачка</span>
+                                <span class="col-sleep">Сон (мин)</span>
+                            </div>
+
+                            <div class="slot-table" id="smart-slot-table"></div>
+
+                            <!-- 🧹 ЧИСТКА СЛЕДОВ СЕССИИ -->
+                            <div class="cleaner-row" id="cleaner-row">
+                                <div class="cleaner-info">
+                                    <div class="cleaner-label">🧹 Чистка следов сессии</div>
+                                    <div class="cleaner-sub">
+                                        Чистка реестра и временных файлов.<br>
+                                        Версия Roblox сохраняется
+                                    </div>
+                                    <div class="cleaner-status" id="cleaner-status"></div>
+                                </div>
+                                <div class="cleaner-toggle" id="cleaner-toggle"></div>
+                            </div>
+
+                            <!-- 🔀 СМЕНА HWID МЕЖДУ СЛОТАМИ -->
+                            <div class="cleaner-row" id="volthwid-row">
+                                <div class="cleaner-info">
+                                    <div class="cleaner-label">🔀 Смена HWID между слотами</div>
+                                    <div class="cleaner-sub">
+                                        Меняет MAC-адрес сетевого адаптера между<br>
+                                        слотами — это аппаратный идентификатор,<br>
+                                        который видит Volt. Независимо от чистки.
+                                    </div>
+                                    <div class="cleaner-status" id="volthwid-status"></div>
+                                </div>
+                                <div class="cleaner-toggle" id="volthwid-toggle"></div>
+                            </div>
+
+                            <!-- 🖱️ СМЕНА MAC МЕЖДУ СЛОТАМИ (ОТДЕЛЬНО ОТ HWID) -->
+                            <div class="cleaner-row" id="macswap-row">
+                                <div class="cleaner-info">
+                                    <div class="cleaner-label">🖱️ Смена MAC между слотами</div>
+                                    <div class="cleaner-sub">
+                                        Меняет MAC-адрес сетевого адаптера между<br>
+                                        слотами. Если выключено — завершение пачки<br>
+                                        стыкуется к IP (END), без сдвига −2 мин.
+                                    </div>
+                                    <div class="cleaner-status" id="macswap-status"></div>
+                                </div>
+                                <div class="cleaner-toggle" id="macswap-toggle"></div>
+                            </div>
+
+                            <!-- 🔄 ПЕРЕУСТАНОВКА ROBLOX (ШАГ ВНУТРИ ЧИСТКИ) -->
+                            <div class="cleaner-row" id="cleanerreinstall-row">
+                                <div class="cleaner-info">
+                                    <div class="cleaner-label">🔄 Переустановка Roblox</div>
+                                    <div class="cleaner-sub">
+                                        Сначала чистится мусор и реестр, потом<br>
+                                        ставится свежий Roblox, затем Roblox<br>
+                                        закрывается через taskkill. Выбор сохраняется.
+                                    </div>
+                                    <div class="cleaner-status" id="cleanerreinstall-status"></div>
+                                </div>
+                                <div class="cleaner-toggle" id="cleanerreinstall-toggle"></div>
+                            </div>
+
+                            <!-- 🎲 СМЕНА ИГРЫ (PLACE ID) -->
+                            <div class="cleaner-row" id="placeidswap-row">
+                                <div class="cleaner-info">
+                                    <div class="cleaner-label">🎲 Смена игры по аккаунтам</div>
+                                    <div class="cleaner-sub">
+                                        Каждый аккаунт уезжает в случайную игру<br>
+                                        на 40–120 с и возвращается обратно.<br>
+                                        Работает только с FarmTimer + смена MAC/IP
+                                    </div>
+                                    <div class="cleaner-status" id="placeidswap-status"></div>
+                                </div>
+                                <div class="cleaner-toggle" id="placeidswap-toggle"></div>
+                            </div>
+
+                            <!-- 💤 ОТДЫХ ПОСЕРЕДИНЕ ЦИКЛА -->
+                            <div class="cleaner-row" id="midrest-row">
+                                <div class="cleaner-info">
+                                    <div class="cleaner-label">💤 Отдых посередине цикла</div>
+                                    <div class="cleaner-sub">
+                                        Делит слот на 2 части. На 35–50% —<br>
+                                        плавное закрытие и отлёг, затем<br>
+                                        вторая половина слота.
+                                    </div>
+                                    <div class="cleaner-status" id="midrest-status"></div>
+                                </div>
+                                <div class="cleaner-toggle" id="midrest-toggle"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-modal-footer settings-modal-footer-center">
+                <button class="settings-modal-confirm settings-modal-confirm-amber" id="farmtimer-modal-confirm">✅ Подтвердить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА VOLT AUTH CONTROL ===== -->
+    <div class="settings-modal-overlay" id="voltauth-modal-overlay">
+        <div class="settings-modal settings-modal-amber" style="width: 470px;">
+            <div class="settings-modal-header settings-modal-header-amber">
+                <span class="settings-modal-title settings-modal-title-amber">🔐 VOLT AUTH CONTROL</span>
+                <button class="settings-modal-close" id="voltauth-modal-close">✕</button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="settings-modal-row">
+                    <span class="settings-modal-label">👤 Логин:</span>
+                    <input type="text" class="settings-modal-input settings-modal-input-wide" id="voltauth-login-input" placeholder="Логин Volt" autocomplete="off" spellcheck="false">
+                </div>
+
+                <div class="settings-modal-row">
+                    <span class="settings-modal-label">🔑 Пароль:</span>
+                    <div class="password-wrap">
+                        <input type="password" class="settings-modal-input settings-modal-input-wide" id="voltauth-password-input" placeholder="Пароль Volt" autocomplete="off" spellcheck="false">
+                        <button type="button" class="password-eye" id="voltauth-eye" data-tooltip="Показать пароль">👁</button>
+                    </div>
+                </div>
+
+                <div class="settings-modal-divider"></div>
+
+                <div class="settings-modal-hint settings-modal-hint-amber settings-modal-hint-center" id="voltauth-hint">
+                    Логин и пароль хранятся локально и используются для автологина Volt
+                </div>
+            </div>
+            <div class="settings-modal-footer settings-modal-footer-center">
+                <button class="settings-modal-confirm settings-modal-confirm-amber" id="voltauth-modal-save">💾 Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА RAM BOOST ===== -->
+    <div class="settings-modal-overlay" id="ramboost-modal-overlay">
+        <div class="settings-modal settings-modal-amber" style="width: 460px;">
+            <div class="settings-modal-header settings-modal-header-amber">
+                <span class="settings-modal-title settings-modal-title-amber">⚙ НАСТРОЙКИ RAM BOOST</span>
+                <button class="settings-modal-close" id="ramboost-modal-close">✕</button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="settings-modal-row settings-modal-row-center">
+                    <span class="settings-modal-label">💾 Лимит памяти (МБ):</span>
+                    <input type="number" class="settings-modal-input" id="ramboost-value-input" value="750" min="750" max="8192" style="width: 90px;">
+                    <span style="font-size: 11px; color: #ef4444;">⚠️ Мин. 750 МБ</span>
+                </div>
+                <div class="settings-modal-divider"></div>
+                <div class="settings-modal-row settings-modal-slider-row">
+                    <div class="settings-modal-slider-header">
+                        <span class="settings-modal-label" style="font-size: 12px;">⏱️ Таймаут между чистками (сек):</span>
+                        <span class="settings-modal-slider-value" id="ramboost-interval-value">3с</span>
+                    </div>
+                    <input type="range" id="ramboost-interval-slider" min="0.3" max="5" value="3" step="0.1" style="width: 100%;">
+                    <div class="settings-modal-slider-labels">
+                        <span>1с</span>
+                        <span class="settings-modal-slider-warning">⚠️ Низкий таймаут нагружает процессор</span>
+                        <span>5с</span>
+                    </div>
+                </div>
+                <div class="settings-modal-divider"></div>
+                <div class="settings-modal-row settings-modal-slider-row">
+                    <div class="settings-modal-slider-header">
+                        <span class="settings-modal-label" style="font-size: 12px;">⏱️ Таймаут для 1 процесса (сек):</span>
+                        <span class="settings-modal-slider-value" id="ramboost-process-interval-value">10с</span>
+                    </div>
+                    <input type="range" id="ramboost-process-interval-slider" min="1" max="60" value="10" step="1" style="width: 100%;">
+                    <div class="settings-modal-slider-labels">
+                        <span>1с</span>
+                        <span>10с</span>
+                        <span>60с</span>
+                    </div>
+                </div>
+                <div class="settings-modal-divider"></div>
+                <div class="settings-modal-row settings-modal-row-center">
+                    <label class="settings-modal-checkbox" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="ramboost-console-log">
+                        <span class="settings-modal-checkmark" style="width: 18px; height: 18px;"></span>
+                        <span style="font-size: 12px; color: #c8d0dc;">Транслировать в консоль</span>
+                    </label>
+                </div>
+            </div>
+            <div class="settings-modal-footer settings-modal-footer-center">
+                <button class="settings-modal-confirm settings-modal-confirm-amber" id="ramboost-modal-confirm">✅ Подтвердить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА ANTI-AFK ===== -->
+    <div class="settings-modal-overlay" id="antiafk-modal-overlay">
+        <div class="settings-modal settings-modal-amber" style="width: 460px;">
+            <div class="settings-modal-header settings-modal-header-amber">
+                <span class="settings-modal-title settings-modal-title-amber">⚙ НАСТРОЙКИ ANTI-AFK</span>
+                <button class="settings-modal-close" id="antiafk-modal-close">✕</button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="settings-modal-row settings-modal-slider-row">
+                    <div class="settings-modal-slider-header">
+                        <span class="settings-modal-label" style="font-size: 12px;">⏱️ Секунд на каждое окно:</span>
+                        <span class="settings-modal-slider-value" id="antiafk-intensity-value">5с</span>
+                    </div>
+                    <input type="range" id="antiafk-intensity-slider" min="2" max="15" value="5" step="1" style="width: 100%;">
+                    <div class="settings-modal-slider-labels">
+                        <span>2с</span>
+                        <span>время в окне ±30%</span>
+                        <span>15с</span>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-modal-footer settings-modal-footer-center">
+                <button class="settings-modal-confirm settings-modal-confirm-amber" id="antiafk-modal-confirm">✅ Подтвердить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА НАСТРОЕК CONSOLE LAUNCHER ===== -->
+    <div class="settings-modal-overlay" id="cl-settings-modal-overlay">
+        <div class="cl-modal-new" style="width: 950px;">
+            <style>
+                #cl-settings-modal-overlay .cl-modal-new .dual-range-track{background:#334155;}
+                #cl-settings-modal-overlay .cl-modal-new .dual-range-fill{background:linear-gradient(90deg,rgba(251,191,36,0.5),#fbbf24);}
+                #cl-settings-modal-overlay .cl-modal-new .dual-range input[type="range"]::-webkit-slider-thumb{background:radial-gradient(circle,#fbbf24,#f59e0b);border:2px solid rgba(15,23,42,0.9);box-shadow:0 10px 20px -12px rgba(251,191,36,1);}
+                #cl-settings-modal-overlay .cl-modal-new .dual-range input[type="range"]::-moz-range-thumb{background:radial-gradient(circle,#fbbf24,#f59e0b);border:2px solid rgba(15,23,42,0.9);}
+                #cl-settings-modal-overlay .cl-modal-new input[type="range"].cl-range::-webkit-slider-thumb{background:linear-gradient(135deg,#fbbf24,#f59e0b);margin-top:-6px}
+                #cl-settings-modal-overlay .cl-modal-new input[type="range"].cl-range::-moz-range-thumb{background:linear-gradient(135deg,#fbbf24,#f59e0b);margin-top:-6px}
+                #cl-settings-modal-overlay .cl-modal-new input[type="range"].cl-range::-webkit-slider-runnable-track{background:#334155;height:4px;border-radius:999px;top:10px}
+                #cl-settings-modal-overlay .cl-modal-new input[type="range"].cl-range::-moz-range-track{background:#334155;height:4px;border-radius:999px;top:10px}
+                #cl-settings-modal-overlay .cl-modal-new{background:radial-gradient(circle at top,rgba(251,191,36,0.05),transparent 40%),linear-gradient(180deg,rgba(30,41,59,0.98) 0%,rgba(15,23,42,0.98) 100%);border:1px solid rgba(251,191,36,0.25);border-radius:14px;box-shadow:0 0 0 1px rgba(251,191,36,0.08),0 40px 80px -40px rgba(251,191,36,0.25),0 60px 120px rgba(0,0,0,0.6);overflow:hidden;display:flex;flex-direction:column;position:relative}
+                #cl-settings-modal-overlay .cl-modal-new .settings-modal-header{padding:10px 16px !important;border-bottom:1px solid rgba(251,191,36,0.25) !important;background:linear-gradient(90deg,transparent 0%,rgba(251,191,36,0.08) 50%,transparent 100%) !important;justify-content:center !important;position:relative !important;margin-bottom:0 !important;border-radius:0 !important;gap:0 !important}
+                #cl-settings-modal-overlay .cl-modal-new .settings-modal-title{font-size:14px !important;font-weight:600 !important;letter-spacing:.18em !important;text-transform:uppercase !important;color:#fbbf24 !important;display:flex !important;align-items:center !important;gap:8px !important;position:absolute !important;left:50% !important;transform:translateX(-50%) !important}
+                #cl-settings-modal-overlay .cl-modal-new .settings-modal-title::before{content:'⚙';font-size:14px;color:#fbbf24}
+                #cl-settings-modal-overlay .cl-modal-new .settings-modal-close{color:#94a3b8 !important;transition:color .2s,transform .2s !important;margin-left:auto !important;position:relative !important;z-index:2 !important;background:transparent !important;border:none !important;align-self:center !important}
+                #cl-settings-modal-overlay .cl-modal-new .settings-modal-close:hover{color:#f8fafc;transform:rotate(90deg)}
+                #cl-settings-modal-overlay .cl-modal-new .settings-modal-body{display:grid;grid-template-columns:180px 1fr;min-height:520px;max-height:70vh;padding:0;overflow:visible;border-bottom-left-radius:14px;border-bottom-right-radius:14px;align-items:stretch;align-items:stretch !important;background:transparent !important}
+                #cl-settings-modal-overlay .cl-modal-new .cl-sidebar{border-right:1px solid rgba(251,191,36,0.15);background:radial-gradient(circle at top,rgba(251,191,36,0.05),transparent 60%),linear-gradient(180deg,rgba(30,41,59,0.95) 0%,rgba(15,23,42,0.98) 100%);display:flex;flex-direction:column;padding:18px 8px;gap:6px;align-self:stretch;min-height:520px}
+                #cl-settings-modal-overlay .cl-modal-new .cl-sidebar-title{font-size:11px;text-transform:uppercase;letter-spacing:.22em;color:rgba(248,250,252,0.5);margin:4px 10px 12px}
+                #cl-settings-modal-overlay .cl-modal-new .cl-tab{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:12px;color:#cbd5e1;font-size:13px;cursor:pointer;transition:background .2s,color .2s,box-shadow .2s}
+                #cl-settings-modal-overlay .cl-modal-new .cl-tab-dot{width:6px;height:6px;border-radius:50%;background:rgba(148,163,184,0.6);box-shadow:0 0 0 6px transparent;transition:background .2s,box-shadow .2s}
+                #cl-settings-modal-overlay .cl-modal-new .cl-tab.active{background:linear-gradient(90deg,rgba(251,191,36,0.22) 0%,transparent 90%);color:#f8fafc;box-shadow:inset 0 1px 0 rgba(251,191,36,0.24)}
+                #cl-settings-modal-overlay .cl-modal-new .cl-tab.active .cl-tab-dot{background:radial-gradient(circle,#fbbf24,#f59e0b);box-shadow:0 0 0 6px rgba(251,191,36,0.14)}
+                #cl-settings-modal-overlay .cl-modal-new .cl-tab:hover:not(.active){background:rgba(148,163,184,0.12);color:#f8fafc}
+                #cl-settings-modal-overlay .cl-modal-new .cl-content{display:flex;flex-direction:column;overflow:auto}
+                #cl-settings-modal-overlay .cl-modal-new .cl-content-header{padding:22px 28px 10px;display:flex;flex-direction:column;gap:4px}
+                #cl-settings-modal-overlay .cl-modal-new .cl-content-title{font-size:16px;font-weight:600;color:#f8fafc}
+                #cl-settings-modal-overlay .cl-modal-new .cl-content-subtitle{font-size:12px;color:#94a3b8}
+                #cl-settings-modal-overlay .cl-modal-new .cl-content-body{padding:0 28px 18px;display:flex;flex-direction:column;gap:10px}
+                #cl-settings-modal-overlay .cl-modal-new .settings-modal-row{margin-bottom:0 !important;gap:12px !important;flex-wrap:nowrap !important;align-items:center !important}
+                #cl-settings-modal-overlay .cl-modal-new .settings-modal-label{font-size:13px !important;color:#cbd5e1 !important;white-space:nowrap !important}
+#cl-settings-modal-overlay .cl-modal-new .settings-modal-row span,#cl-settings-modal-overlay .cl-modal-new .settings-modal-row label{color:#cbd5e1 !important}
+                #cl-settings-modal-overlay .cl-modal-new .settings-modal-input{background:linear-gradient(180deg,rgba(15,23,42,0.4) 0%,rgba(15,23,42,0.25) 100%) !important;border:1px solid rgba(148,163,184,0.4) !important;border-radius:10px !important;padding:6px 12px !important;color:#f8fafc !important;font-size:13px !important}
+                #cl-settings-modal-overlay .cl-modal-new .cleaner-toggle{width:42px;height:24px;border-radius:999px;background:linear-gradient(180deg,rgba(148,163,184,0.4) 0%,rgba(71,85,105,0.8) 100%);border:1px solid rgba(148,163,184,0.5);position:relative;flex-shrink:0}
+                #cl-settings-modal-overlay .cl-modal-new .cleaner-toggle.on{background:linear-gradient(180deg,rgba(251,191,36,0.9) 0%,rgba(245,158,11,0.9) 100%);box-shadow:0 0 0 4px rgba(251,191,36,0.14)}
+                #cl-settings-modal-overlay .cl-modal-new .cleaner-toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle,#f8fafc,#e2e8f0);transition:transform .25s}
+                #cl-settings-modal-overlay .cl-modal-new .cleaner-toggle.on::after{left:auto;transform:translateX(18px)}
+                #cl-settings-modal-overlay .cl-modal-new .btn{background:linear-gradient(180deg,rgba(30,41,59,0.9) 0%,rgba(15,23,42,0.9) 100%) !important;border:1px solid rgba(148,163,184,0.4) !important;border-radius:999px !important;padding:6px 14px !important;color:#e2e8f0 !important;font-size:12px !important}
+                #cl-settings-modal-overlay .cl-modal-new .btn:hover{border-color:rgba(251,191,36,0.8) !important;color:#fbbf24 !important;box-shadow:0 0 0 3px rgba(251,191,36,0.1) !important}
+                #cl-settings-modal-overlay .cl-modal-new .btn-sm{padding:5px 13px !important;font-size:14px !important}
+                #cl-settings-modal-overlay .cl-modal-new .dual-range{position:relative;flex:1;min-width:320px;height:24px}
+                #cl-settings-modal-overlay .cl-modal-new .dual-range-track{position:absolute;top:10px;left:0;right:0;height:4px;background:#334155;border-radius:999px;min-width:100px !important;flex:1}
+                #cl-settings-modal-overlay .cl-modal-new .dual-range-fill{position:absolute;top:10px;left:0;height:4px;background:linear-gradient(90deg,rgba(251,191,36,0.5),#fbbf24);border-radius:999px;min-width:100px !important;flex:1}
+                #cl-settings-modal-overlay .cl-modal-new .dual-range input[type="range"]{position:absolute;top:0;left:0;width:100%;height:24px;-webkit-appearance:none;appearance:none;background:transparent;pointer-events:none}
+                #cl-settings-modal-overlay .cl-modal-new .dual-range input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle,#fbbf24,#f59e0b);cursor:pointer;pointer-events:auto;border:2px solid rgba(15,23,42,0.9);box-shadow:0 10px 20px -12px rgba(251,191,36,1)}
+                #cl-settings-modal-overlay .cl-modal-new select.settings-modal-input{background:linear-gradient(180deg,rgba(15,23,42,0.4) 0%,rgba(15,23,42,0.25) 100%) !important;-webkit-appearance:none !important;appearance:none !important;color:#f8fafc !important;border:1px solid rgba(148,163,184,0.4) !important;border-radius:10px !important;padding:6px 12px !important}
+#cl-settings-modal-overlay .cl-modal-new select.settings-modal-input option{background:#1e293b !important;color:#f8fafc !important}
+                #cl-settings-modal-overlay .cl-modal-new .settings-modal-footer{padding:14px 24px;border-top:1px solid rgba(251,191,36,0.25);display:flex;justify-content:center;background:linear-gradient(180deg,transparent 0%,rgba(251,191,36,0.01) 100%);border-radius:0 0 14px 14px;margin-top:0}
+                #cl-settings-modal-overlay .cl-modal-new .settings-modal-confirm{background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 100%) !important;color:#1f2937 !important;border:none !important;border-radius:999px !important;padding:10px 36px !important;font-size:14px !important;font-weight:600 !important;box-shadow:0 18px 40px -18px rgba(251,191,36,0.9) !important}
+                #cl-settings-modal-overlay .cl-modal-new .dim{font-size:11px !important;color:rgba(200,208,220,0.3) !important;font-style:italic !important}
+                #cl-settings-modal-overlay .cl-modal-new .cl-sort-line{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;flex:1}
+                #cl-settings-modal-overlay .cl-modal-new .cl-sort-line .settings-modal-label{margin:0 4px !important;flex-shrink:0 !important;display:inline-block !important;visibility:visible !important;opacity:1 !important}
+                #cl-settings-modal-overlay .cl-modal-new .cl-sort-line .settings-modal-input{width:50px !important;text-align:center !important;padding:6px 8px !important}
+                #cl-settings-modal-overlay .cl-modal-new .cl-hidden{display:none}
+            </style>
+            <div class="settings-modal-header settings-modal-header-amber">
+                <span class="settings-modal-title settings-modal-title-amber">НАСТРОЙКА ЛАУНЧЕРА</span>
+                <button class="settings-modal-close" id="cl-settings-modal-close">✕</button>
+            </div>
+            <div class="settings-modal-body">
+                <aside class="cl-sidebar">
+                    <div class="cl-sidebar-title">НАСТРОЙКИ</div>
+                    <div class="cl-tab active" data-cl-tab="general"><span class="cl-tab-dot"></span><span>Общие</span></div>
+                    <div class="cl-tab" data-cl-tab="roblox"><span class="cl-tab-dot"></span><span>Roblox</span></div>
+                </aside>
+                <div class="cl-content">
+                    <div class="cl-content-header">
+                        <div class="cl-content-title" id="cl-tab-title">Общие</div>
+                        <div class="cl-content-subtitle" id="cl-tab-subtitle">Базовые параметры запуска и защиты</div>
+                    </div>
+                    <div class="cl-content-body" id="cl-tab-general">
+                        <div class="settings-modal-hint settings-modal-hint-amber" style="font-size:11.5px;line-height:1.55;text-align:left;">
+                            🖼️ <b>Чтобы приложение работало корректно, оно должно быть запущено от имени администратора, а ваше разрешение экрана не меньше чем 1920x1080, а мышь должна иметь 100% DPI в настройках windows.</b>
+
+                        </div>
+                        <div class="settings-modal-row">
+                            <span class="settings-modal-label" style="min-width:auto !important;display:flex;align-items:center;gap:8px;font-size:12px;">
+                                <span class="driver-status-dot checking" id="cl-nav-env-dot"></span>
+                                <span id="cl-nav-env-text">Проверка параметров экрана…</span>
+                            </span>
+                        </div>
+                        <div class="settings-modal-row">
+                            <span class="settings-modal-label">OpenDelay</span>
+                            <div class="dual-range" id="cl-open-delay-range">
+                                <div class="dual-range-track"></div>
+                                <div class="dual-range-fill" id="cl-open-delay-fill"></div>
+                                <input type="range" id="cl-delay-min-slider" min="5" max="300" value="5" step="1">
+                                <input type="range" id="cl-delay-max-slider" min="5" max="300" value="10" step="1">
+                            </div>
+                            <span class="settings-modal-label"><span id="cl-delay-min-value">5</span>–<span id="cl-delay-max-value">10</span> сек</span>
+                        </div>
+                        <div class="settings-modal-row">
+                            <div class="cleaner-toggle" id="cl-error-window-toggle"></div>
+                            <span class="settings-modal-label" style="min-width:280px !important;">Автоматический детект ошибки 403 и ее устранение</span>
+                        </div>
+                        <div class="settings-modal-row">
+                            <div class="cleaner-toggle" id="cl-randomize-toggle"></div>
+                            <span class="settings-modal-label">Шум окон (случайные позиции при открытии)</span>
+                        </div>
+                        <div class="settings-modal-row">
+                            <div class="cleaner-toggle" id="cl-sort-enabled-toggle"></div>
+                            <span class="settings-modal-label" style="min-width:110px !important;">Сортировка окон</span>
+                            <div class="cl-sort-line">
+                                <input class="settings-modal-input" id="cl-width" value="150">
+                                <span style="color:#cbd5e1;">x</span>
+                                <input class="settings-modal-input" id="cl-height" value="150">
+                                <span class="settings-modal-label" style="min-width:auto !important;">Окон в ряд</span>
+                                <input class="settings-modal-input" id="cl-arrange-cols" value="10">
+                                <span class="settings-modal-label" style="min-width:auto !important;">Сортировка</span>
+                                <input class="settings-modal-input" id="cl-sort-interval" value="60">
+                                <span class="settings-modal-label" style="min-width:auto !important;">сек</span>
+                            </div>
+                        </div>
+                        <div class="settings-modal-row">
+                            <div class="cleaner-toggle" id="cl-error-relaunch-toggle"></div>
+                            <span class="settings-modal-label">Перезагрузка окон с внутренней ошибкой Roblox</span>
+                            <span style="font-size: 10px; color: #a855f7; white-space: nowrap; margin-left: auto;">Откалиброванно, под сортировку 200x200</span>
+                        </div>
+                        <div class="settings-modal-row">
+                            <div class="cleaner-toggle" id="cl-captcha-isolate-toggle"></div>
+                            <span class="settings-modal-label">Изолировать аккаунты с капчей (блокировать запуск)</span>
+                            <span style="font-size: 10px; color: #a855f7; white-space: nowrap; margin-left: auto;">Откалиброванно, под сортировку 200x200</span>
+                        </div>
+
+                        <div class="settings-modal-row" id="cl-proxy-row">
+                            <div class="cleaner-toggle" id="cl-proxy-toggle"></div>
+                            <span class="settings-modal-label" style="min-width:auto !important;">Использовать прокси</span>
+                            <button class="btn btn-sm" id="cl-test-proxy-btn" style="margin-left:8px;white-space:nowrap;">Тест прокси</button>
+                            <button class="btn btn-sm" id="cl-driver-install-btn" style="margin-left:4px;white-space:nowrap;">🔌 Драйвер</button>
+                            <span class="driver-status-dot" id="cl-driver-dot" style="margin-left:8px;"></span>
+                            <button class="btn btn-sm" id="cl-driver-check-btn" style="margin-left:8px;white-space:nowrap;">Проверить</button>
+                        </div>
+                        <div class="settings-modal-row" id="cl-mac-row">
+                            <div class="cleaner-toggle" id="cl-mac-account-toggle"></div>
+                            <span class="settings-modal-label" style="min-width:280px !important;">Индивидуальный MAC для каждого аккаунта</span>
+                            <span class="settings-modal-label dim" style="min-width:auto !important;margin-left:12px;">⚠️ Требуется Windows 11 Pro/Enterprise(Hyper-V)</span>
+                        </div>
+
+                        <div class="settings-modal-row">
+                            <span class="settings-modal-label">GameName:</span>
+                            <input class="settings-modal-input" id="cl-gamename" value="" placeholder="Название игры (поиск в Roblox)" title="Мастер-игра: название, которое навигатор введёт в поиск Roblox" style="width:220px;">
+                            <button class="btn" id="cl-save-gamename-btn" style="height:26px;padding:0 8px;font-size:14px;" title="Сохранить GameName">✓</button>
+                            <span class="settings-modal-label" style="min-width:auto !important;margin-left:16px;">Проверка окон (сек):</span>
+                            <input class="settings-modal-input" id="cl-check-interval" value="60" style="width:60px;">
+                        </div>
+                    </div>
+                    <div class="cl-content-body cl-hidden" id="cl-tab-roblox">
+                        <div class="settings-modal-row">
+                            <span class="settings-modal-label">Версия Roblox:</span>
+                            <select class="settings-modal-input" id="cl-version" style="min-width:320px;max-width:420px;"></select>
+                            <span class="version-check-btn" id="cl-version-register-toggle">✓</span>
+                            <div class="cleaner-toggle" id="cl-version-manual-toggle" title="Рукописный ввод"></div>
+                            <span class="settings-modal-label" style="min-width:auto !important;margin-left:8px;">Рукописный ввод</span>
+                        </div>
+                        <div class="settings-modal-row" id="cl-version-manual-row" style="display:none;">
+                            <span class="settings-modal-label">Версия:</span>
+                            <input class="settings-modal-input" id="cl-version-manual-input" type="text" placeholder="version-…" autocomplete="off" spellcheck="false" style="min-width:320px;max-width:420px;">
+                            <span class="driver-status-dot" id="cl-version-check-dot" style="margin-left:8px;"></span>
+                            <span class="settings-modal-label dim" id="cl-version-check-text" style="min-width:auto !important;">—</span>
+                        </div>
+                        <div class="settings-modal-label dim" id="cl-version-path"></div>
+                        <div class="settings-modal-label dim" id="cl-version-hint">Выбранная версия также будет устанавливаться спуфером (Vlt-clean / переустановка Roblox)</div>
+                        <div class="settings-modal-row">
+                            <button type="button" class="btn-browse" id="cl-version-install-btn" style="white-space:nowrap;">⬇️ Установить</button>
+                            <button type="button" class="btn-browse" id="cl-version-export-btn" style="white-space:nowrap;">📄 Список версий (txt)</button>
+                            <button type="button" class="btn-browse" id="cl-open-version-backup" style="white-space:nowrap;">🗄️ Хранилище</button>
+                        </div>
+                        <div class="settings-modal-label dim" id="cl-version-install-status"></div>
+                        <div class="settings-modal-row">
+                            <div class="cleaner-toggle" id="cl-fix-installer-toggle"></div>
+                            <span class="settings-modal-label">Fix installer Roblox (карантин установщика)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-modal-footer settings-modal-footer-center">
+                <button class="settings-modal-confirm settings-modal-confirm-amber" id="cl-settings-modal-confirm">✅ Подтвердить</button>
+            </div>
+            <script nonce="ferma-inline-2026">
+                (function(){
+                    var tabs = document.querySelectorAll('#cl-settings-modal-overlay .cl-tab');
+                    tabs.forEach(function(tab){
+                        tab.onclick = function(){
+                            tabs.forEach(function(t){ t.classList.remove('active'); });
+                            this.classList.add('active');
+                            var target = this.getAttribute('data-cl-tab');
+                            document.getElementById('cl-tab-general').classList.add('cl-hidden');
+                            document.getElementById('cl-tab-roblox').classList.add('cl-hidden');
+                            if(target === 'general'){
+                                document.getElementById('cl-tab-general').classList.remove('cl-hidden');
+                                document.getElementById('cl-tab-title').textContent = 'Общие';
+                                document.getElementById('cl-tab-subtitle').textContent = 'Базовые параметры запуска и защиты';
+                            }else if(target === 'roblox'){
+                                document.getElementById('cl-tab-roblox').classList.remove('cl-hidden');
+                                document.getElementById('cl-tab-title').textContent = 'Roblox';
+                                document.getElementById('cl-tab-subtitle').textContent = 'Версия клиента и установщик';
+                            }
+                        };
+                    });
+                })();
+            </script>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА ПРОВЕРКИ ПАЧКИ (ZeroPoint) ===== -->
+    <div class="settings-modal-overlay" id="packcheck-modal-overlay">
+        <div class="settings-modal settings-modal-amber" style="width: 470px;">
+            <div class="settings-modal-header settings-modal-header-amber">
+                <span class="settings-modal-title settings-modal-title-amber" id="packcheck-title">🔎 ПРОВЕРКА ПАЧКИ</span>
+                <button class="settings-modal-close" id="packcheck-close">✕</button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="packcheck-progress-row">
+                    <div class="packcheck-progress-label">
+                        <span id="packcheck-phase">Отправка...</span>
+                        <span id="packcheck-count">0 / 0</span>
+                    </div>
+                    <div class="packcheck-bar"><div class="packcheck-bar-fill" id="packcheck-bar"></div></div>
+                    <div class="packcheck-pct" id="packcheck-pct">0%</div>
+                </div>
+                <div class="packcheck-grid">
+                    <div class="packcheck-cell alive"><span class="pc-num" id="pc-alive">0</span><span class="pc-label">✅ Alive</span></div>
+                    <div class="packcheck-cell dead"><span class="pc-num" id="pc-dead">0</span><span class="pc-label">❌ Dead</span></div>
+                    <div class="packcheck-cell face"><span class="pc-num" id="pc-face">0</span><span class="pc-label">🧑 FaceLock</span></div>
+                    <div class="packcheck-cell captcha"><span class="pc-num" id="pc-captcha">0</span><span class="pc-label">🧩 Captcha</span></div>
+                    <div class="packcheck-cell ban"><span class="pc-num" id="pc-ban">0</span><span class="pc-label">⚠️ Ban/Warn</span></div>
+                </div>
+                <div class="packcheck-status" id="packcheck-status"></div>
+                <div class="packcheck-actions" id="packcheck-actions" style="display:none;">
+                    <button class="pc-act pc-act-captcha" id="pc-act-captcha" disabled>🧩 CaptchaLock → в сольвер</button>
+                    <button class="pc-act pc-act-face" id="pc-act-face" disabled>🧑 FaceLock → на разблокировку</button>
+                    <button class="pc-act pc-act-dead" id="pc-act-dead" disabled>❌ CookieDead → свежие куки</button>
+                </div>
+                <div class="packcheck-solve" id="packcheck-solve"></div>
+                <button class="pc-act pc-act-copy" id="pc-copy-fresh" style="display:none;">📋 Копировать свежие куки</button>
+            </div>
+            <div class="settings-modal-footer settings-modal-footer-center">
+                <button class="settings-modal-confirm settings-modal-confirm-amber" id="packcheck-done">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА ZEROPOINT API-КЛЮЧЕЙ ===== -->
+    <div class="settings-modal-overlay" id="zeropoint-modal-overlay">
+        <div class="settings-modal settings-modal-amber" style="width: 480px;">
+            <div class="settings-modal-header settings-modal-header-amber">
+                <span class="settings-modal-title settings-modal-title-amber">🔑 ZEROPOINT API-КЛЮЧИ</span>
+                <button class="settings-modal-close" id="zeropoint-close">✕</button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="zp-key-row">
+                    <label>Cookie Checker API</label>
+                    <input type="password" id="zp-cookie-checker" placeholder="ZP_CookieChecker_..." autocomplete="off" spellcheck="false">
+                </div>
+                <div class="zp-key-row">
+                    <label>ZeroUnlock API</label>
+                    <input type="password" id="zp-zero-unlock" placeholder="Ключ ZeroUnlock" autocomplete="off" spellcheck="false">
+                </div>
+                <div class="zp-key-row">
+                    <label>GetCookie API</label>
+                    <input type="password" id="zp-getcookie" placeholder="Ключ GetCookie" autocomplete="off" spellcheck="false">
+                </div>
+                <div class="zp-key-row">
+                    <label>ZeroSolver API</label>
+                    <input type="password" id="zp-zerosolver" placeholder="Ключ ZeroSolver" autocomplete="off" spellcheck="false">
+                </div>
+                <div class="zp-hint">Ключи хранятся локально в config.json и используются только соответствующими API.</div>
+            </div>
+            <div class="settings-modal-footer settings-modal-footer-center">
+                <button class="settings-modal-confirm settings-modal-confirm-amber" id="zeropoint-save">✅ Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА ОСТАНОВКИ ===== -->
+    <div class="settings-modal-overlay" id="stop-settings-modal-overlay">
+        <div class="settings-modal settings-modal-amber">
+            <div class="settings-modal-header settings-modal-header-amber">
+                <span class="settings-modal-title settings-modal-title-amber">⚙ НАСТРОЙКИ ОСТАНОВКИ</span>
+                <button class="settings-modal-close" id="stop-modal-close">✕</button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="settings-modal-checkbox-row">
+                    <label>
+                        <input type="checkbox" id="smooth-stop-enabled">
+                        <span class="checkmark"></span>
+                        Плавное закрытие инстансов
+                    </label>
+                </div>
+                <div class="settings-modal-divider"></div>
+                <div class="slider-section hidden" id="slider-section">
+                    <div class="slider-header">
+                        <span class="slider-label">⏱️ Общее время закрытия</span>
+                        <span class="slider-value" id="slider-value-display">0 сек</span>
+                    </div>
+                    <input type="range" id="stop-slider" min="0" max="1200" value="300" step="10">
+                    <div class="slider-labels">
+                        <span>0 сек</span>
+                        <span>20 мин</span>
+                    </div>
+                    <div class="slider-hint">
+                        Время равномерно распределяется между всеми окнами Roblox.
+                    </div>
+                </div>
+            </div>
+            <div class="settings-modal-footer">
+                <button class="settings-modal-confirm settings-modal-confirm-amber" id="stop-modal-save">💾 Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА ЗАПУСКА (шестерёнка на кнопке СТАРТ) ===== -->
+    <div class="settings-modal-overlay" id="start-settings-modal-overlay">
+        <div class="settings-modal settings-modal-amber" style="width: 460px;">
+            <div class="settings-modal-header settings-modal-header-amber">
+                <span class="settings-modal-title settings-modal-title-amber">⚙ НАСТРОЙКИ ЗАПУСКА</span>
+                <button class="settings-modal-close" id="start-modal-close">✕</button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="cleaner-row">
+                    <div class="cleaner-info">
+                        <div class="cleaner-label">Вклиниться в сеанс</div>
+                    </div>
+                    <div class="cleaner-toggle" id="start-join-toggle"></div>
+                </div>
+                <div class="settings-modal-hint settings-modal-hint-amber">
+                    Автоматически продолжит фарм в случае краша или перезапуска приложения, не перезагружая ферму.
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА DISCORD ===== -->
+    <div class="discord-settings-modal-overlay" id="discord-settings-modal">
+        <div class="discord-settings-modal">
+            <div class="discord-settings-modal-header">
+                <span class="discord-settings-modal-title">⚙ НАСТРОЙКИ DISCORD</span>
+                <button class="discord-settings-modal-close" id="discord-settings-close">✕</button>
+            </div>
+            <div class="discord-settings-modal-body">
+                <div class="discord-settings-modal-row">
+                    <label>Токен бота:</label>
+                    <input type="password" id="discord-modal-token" placeholder="Введите токен бота...">
+                </div>
+                <div class="discord-settings-modal-row">
+                    <label>ID канала:</label>
+                    <input type="text" id="discord-modal-channel" placeholder="Введите ID канала...">
+                </div>
+                <div class="discord-settings-checkbox-row">
+                    <label>
+                        <input type="checkbox" id="discord-auto-connect">
+                        <span class="checkmark"></span>
+                        Подключать при запуске
+                    </label>
+                </div>
+            </div>
+            <div class="discord-settings-modal-footer">
+                <button class="discord-settings-modal-confirm" id="discord-settings-save">💾 Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА COOKIE ===== -->
+    <div class="cookie-input-overlay" id="cookie-modal-overlay">
+        <div class="cookie-modal-card">
+            <h4 id="modal-title">Ввод данных для Cookie</h4>
+            <div class="cookie-paste-zone" id="cookie-paste-zone">
+                <div class="cookie-line-numbers" id="cookie-line-numbers" aria-hidden="true">1</div>
+                <textarea id="textarea-cookie-raw" spellcheck="false" wrap="off" placeholder="Вставьте сюда ваши куки..."></textarea>
+            </div>
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:4px;">Прокси: строка N = аккаунт N. Пустая строка = аккаунт без прокси.</div>
+            <div class="cookie-paste-zone" id="proxy-paste-zone" style="height:160px;margin-bottom:10px;">
+                <div class="cookie-line-numbers" id="proxy-line-numbers" aria-hidden="true">1</div>
+                <textarea id="textarea-proxy-raw" spellcheck="false" wrap="off" placeholder="Прокси (по одному на строку, опционально): host:port или user:pass@host:port"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" id="btn-modal-close">Отмена</button>
+                <button class="btn-modal-save" id="btn-modal-save-pack">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ ПАЧКИ ===== -->
+    <div class="settings-modal-overlay" id="confirm-delete-pack-overlay">
+        <div class="settings-modal settings-modal-amber" style="width: 400px;">
+            <div class="settings-modal-header settings-modal-header-amber">
+                <span class="settings-modal-title settings-modal-title-amber">🗑️ УДАЛЕНИЕ ПАЧКИ</span>
+                <button class="settings-modal-close" id="confirm-delete-pack-close">✕</button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="settings-modal-hint settings-modal-hint-amber settings-modal-hint-center" id="confirm-delete-pack-text">
+                    Удалить пачку?
+                </div>
+            </div>
+            <div class="settings-modal-footer settings-modal-footer-center">
+                <button class="settings-modal-cancel" id="confirm-delete-pack-cancel">Отмена</button>
+                <button class="settings-modal-confirm settings-modal-confirm-danger" id="confirm-delete-pack-yes">🗑️ Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ БЭКАПА КУКИ ===== -->
+    <div class="settings-modal-overlay" id="confirm-clear-backups-overlay">
+        <div class="settings-modal settings-modal-amber" style="width: 420px;">
+            <div class="settings-modal-header settings-modal-header-amber">
+                <span class="settings-modal-title settings-modal-title-amber">🗑️ УДАЛЕНИЕ БЭКАПА</span>
+                <button class="settings-modal-close" id="confirm-clear-backups-close">✕</button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="settings-modal-hint settings-modal-hint-amber settings-modal-hint-center" id="confirm-clear-backups-text">
+                    Все аккаунты выбранной пачки потеряют бэкап (бэкапы других пачек не трогаются). Новый бэкап создастся автоматически при следующем запуске каждого аккаунта.
+                </div>
+            </div>
+            <div class="settings-modal-footer settings-modal-footer-center">
+                <button class="settings-modal-cancel" id="confirm-clear-backups-cancel">Отмена</button>
+                <button class="settings-modal-confirm settings-modal-confirm-danger" id="confirm-clear-backups-yes">🗑️ Удалить бэкап</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА ПРЕДУПРЕЖДЕНИЯ: СМЕНА СОСТАВА КУКИ ===== -->
+    <div class="settings-modal-overlay" id="cookie-reset-overlay">
+        <div class="settings-modal settings-modal-amber" style="width: 440px;">
+            <div class="settings-modal-header settings-modal-header-amber">
+                <span class="settings-modal-title settings-modal-title-amber">⚠️ СМЕНА СОСТАВА КУКИ</span>
+                <button class="settings-modal-close" id="cookie-reset-close">✕</button>
+            </div>
+            <div class="settings-modal-body">
+                <div class="settings-modal-hint settings-modal-hint-amber settings-modal-hint-center" id="cookie-reset-text" style="white-space: pre-line; text-align: left; line-height: 1.6;">
+                    Текст предупреждения
+                </div>
+            </div>
+            <div class="settings-modal-footer settings-modal-footer-center">
+                <button class="settings-modal-cancel" id="cookie-reset-cancel">Отмена</button>
+                <button class="settings-modal-confirm settings-modal-confirm-danger" id="cookie-reset-yes">🗑️ Сбросить и сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛКА TELEGRAM ===== -->
+    <div class="telegram-modal-overlay" id="telegram-modal-overlay">
+        <div class="telegram-modal telegram-modal-amber">
+            <div class="telegram-modal-header telegram-modal-header-amber">
+                <span class="telegram-modal-title telegram-modal-title-amber">⚙ НАСТРОЙКИ TELEGRAM</span>
+                <button class="telegram-modal-close telegram-modal-close-amber" id="telegram-modal-close">✕</button>
+            </div>
+            <div class="telegram-modal-body">
+                <div class="telegram-modal-status">
+                    <span class="telegram-status-dot offline" id="telegram-status-dot"></span>
+                    <span class="telegram-status-text offline" id="telegram-status-text">Остановлен</span>
+                </div>
+
+                <div class="telegram-modal-row">
+                    <label>🤖 Токен бота</label>
+                    <input type="password" id="telegram-token-input" placeholder="Введите токен бота...">
+                </div>
+                <div class="telegram-modal-row">
+                    <label>🆔 ID чата</label>
+                    <input type="text" id="telegram-chat-input" placeholder="Введите ID чата...">
+                </div>
+                <div class="telegram-modal-row">
+                    <label>⏱️ Интервал проверки (сек)</label>
+                    <input type="number" id="telegram-interval-input" value="60" min="10" max="600">
+                </div>
+
+                <div class="telegram-modal-checkbox-row">
+                    <label>
+                        <input type="checkbox" id="telegram-auto-start">
+                        <span class="checkmark"></span>
+                        Автозапуск при старте
+                    </label>
+                </div>
+
+                <div class="telegram-modal-footer telegram-modal-footer-amber">
+                    <button class="telegram-modal-btn telegram-modal-btn-amber" id="telegram-modal-save">💾 Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: none;" id="hidden-status-bar">
+        <span id="status-text">OFFLINE</span>
+        <span id="status-pack-time">0 / 240 мин</span>
+        <span id="status-roblox-total">0</span>
+        <span id="status-roblox-online">0</span>
+        <span id="status-yammi">OFFLINE</span>
+        <span id="status-volt">OFFLINE</span>
+    </div>
+
+    <script src="i18n.js"></script>
+    <script src="demo.js" defer></script>
+
+    <!-- ===== МОДАЛКА УСТАНОВКИ ДРАЙВЕРА (ТЗ 10) ===== -->
+    <div class="settings-modal-overlay" id="driver-install-overlay">
+        <div class="settings-modal settings-modal-amber" style="width: 520px;">
+            <div class="settings-modal-header settings-modal-header-amber">
+                <span class="settings-modal-title settings-modal-title-amber">🔌 УСТАНОВКА ПРОКСИ-ДРАЙВЕРА</span>
+                <button class="settings-modal-close" id="driver-install-close">✕</button>
+            </div>
+            <div class="settings-modal-body" style="grid-template-columns: 1fr; text-align: left; white-space: pre-line; line-height: 1.6; padding: 14px 20px; font-size: 13px; color: #e2e8f0;">
+                <div style="margin-bottom:8px;">
+                    <b style="color:#fbbf24;">Что это?</b><br>
+                    Per-instance прокси для Roblox. Каждое окно выходит в интернет
+                    через <b>свой</b> прокси-сервер. Работает на уровне сетевого
+                    драйвера (WinDivert) — внутри Roblox ничего не встраивается,
+                    античит Hyperion ничего не видит.
+                </div>
+                <div style="margin-top:10px;margin-bottom:10px;">
+                    <b style="color:#f87171;">⚠ Внимание, антивирус!</b><br>
+                    Сетевой драйвер может быть воспринят антивирусом как
+                    подозрительный — это <b>ложное срабатывание</b>. Драйвер
+                    WinDivert — легитимный, с открытым исходным кодом,
+                    используется в Proxifier, Clash, игровых тунелях.
+                </div>
+                <div style="margin-top:6px;margin-bottom:10px;">
+                    <b style="color:#94a3b8;">Что делать для исключения:</b><br>
+                    1. Откройте Защитник Windows → <i>Управление исключениями</i><br>
+                    2. Добавьте в исключения папку приложения: <code style="color:#cbd5e1;" id="driver-exception-path">...</code><br>
+                    3. Вернитесь и нажмите <b>«Установить драйвер»</b>
+                </div>
+                <div style="margin-top:4px;font-size:12px;color:#94a3b8;">
+                    Драйвер регистрируется как служба &laquo;WinDivert&raquo; и работает,
+                    пока запущено приложение. Файлы: WinDivert.dll + WinDivert64.sys.
+                </div>
+            </div>
+            <div class="settings-modal-footer settings-modal-footer-center">
+                <button class="settings-modal-cancel" id="driver-install-cancel">Отмена</button>
+                <button class="settings-modal-confirm" id="driver-install-yes" style="background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1e293b;">🔌 Установить драйвер</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

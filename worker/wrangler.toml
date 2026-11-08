@@ -1,0 +1,16 @@
+name = "automaticferma-status"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# Worker висит на маршруте /api/* вашего домена.
+# Сайт на Pages отдаёт статику, Worker перехватывает только /api/*.
+routes = [
+  { pattern = "automaticferma.bid/api/*", zone_name = "automaticferma.bid" }
+]
+
+# Адрес мастер-сервера НИКОГДА не пишем сюда в открытом виде.
+# Задайте его секретом:
+#   npx wrangler secret put SERVER_URL
+# и вставьте URL туннеля, например https://ferma.your-tunnel.example.com
+[vars]
+# SERVER_URL = ""  # ← не заполнять, использовать secret

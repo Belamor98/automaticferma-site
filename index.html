@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutomaticFermaPro — управление мульти-фермой Roblox</title>
+  <meta name="description" content="AutomaticFermaPro: мульти-ферма Roblox под полным контролем — Smart-Swap, Anti-AFK, Solver, Watchdog, Discord/Telegram-боты. Discord-сервер поддержки.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fbbf24'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M24 3 42 10v13c0 11-7.6 19.4-18 22C13.6 42.4 6 34 6 23V10Z' fill='url(%23g)'/%3E%3Cpath d='M27.2 11.5 15.8 27.2h6.9L20.6 38l12.4-16.4h-7.2l1.4-10.1Z' fill='%230f172a'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="#top">
+        <svg class="brand-emblem" viewBox="0 0 48 48" aria-hidden="true">
+          <defs>
+            <linearGradient id="afGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#fbbf24"/>
+              <stop offset="1" stop-color="#a78bfa"/>
+            </linearGradient>
+          </defs>
+          <path d="M24 3 42 10v13c0 11-7.6 19.4-18 22C13.6 42.4 6 34 6 23V10Z" fill="url(#afGrad)"/>
+          <path d="M27.2 11.5 15.8 27.2h6.9L20.6 38l12.4-16.4h-7.2l1.4-10.1Z" fill="#0f172a"/>
+        </svg>
+        <span class="brand-name">Automatic<em>FermaPro</em></span>
+      </a>
+      <nav class="nav">
+        <a href="#features" data-i18n="nav.features">Возможности</a>
+        <a href="#discord" data-i18n="nav.status">Discord</a>
+        <a href="#security" data-i18n="nav.security">Безопасность</a>
+        <a href="#faq" data-i18n="nav.faq">FAQ</a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button class="lang-btn" type="button" data-lang="ru">RU</button>
+        <button class="lang-btn" type="button" data-lang="en">EN</button>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="#download" data-i18n="nav.download">Скачать</a>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-text">
+          <span class="badge" data-i18n="hero.badge">Desktop-приложение для Windows · Build v1.2</span>
+          <h1 data-i18n-html="hero.title">Мульти-ферма Roblox<br>под <span class="amber">полным контролем</span></h1>
+          <p class="lead" data-i18n="hero.lead">
+            AutomaticFermaPro объединяет десятки аккаунтов в одну панель:
+            смена IP/MAC по слотам, Anti-AFK, Solver, Watchdog и боты
+            для Discord и Telegram. Работает, пока вы спите.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-amber" href="#download" data-i18n="hero.cta1">Получить ключ</a>
+            <a class="btn btn-ghost" href="#features" data-i18n="hero.cta2">Возможности</a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat"><b data-i18n="hero.stat1.value">12+</b><span data-i18n="hero.stat1.label">модулей автоматизации</span></div>
+            <div class="stat"><b data-i18n="hero.stat2.value">HWID</b><span data-i18n="hero.stat2.label">привязка лицензии</span></div>
+            <div class="stat"><b data-i18n="hero.stat3.value">24/7</b><span data-i18n="hero.stat3.label">watchdog и автоперезапуск</span></div>
+          </div>
+        </div>
+>
+      </div>
+    </section>
+
+    <!-- ============ DISCORD ============ -->
+    <section class="section" id="discord">
+      <div class="container">
+        <h2 class="section-title" data-i18n-html="discord.title">Наш <span class="amber">Discord</span></h2>
+        <p class="section-sub" data-i18n="discord.sub">Поддержка, новости, ключи и комьюнити — всё в одном сервере.</p>
+
+        <div class="discord-card">
+          <div class="discord-card-main">
+            <span class="discord-logo" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 00.031.056 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028 14.09 14.09 0 001.226-1.994.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.291.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.3 12.3 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.84 19.84 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
+            </span>
+            <div>
+              <div class="discord-name">AUTOBLOXTM | Full Automatic.</div>
+              <div class="discord-sub-line" data-i18n="discord.server">Discord-сервер · dota_sng</div>
+            </div>
+          </div>
+          <div class="discord-card-meta">
+            <div class="meta-item"><span class="meta-key" data-i18n="discord.support.key">Поддержка</span><span class="meta-val">24/7</span></div>
+            <div class="meta-item"><span class="meta-key" data-i18n="discord.news.key">Новости и апдейты</span><span class="meta-val" data-i18n="discord.news.val">первыми</span></div>
+          </div>
+          <a class="btn btn-amber" href="https://discord.gg/NkzyXmA5A" target="_blank" rel="noopener" data-i18n="discord.join">Присоединиться</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DEMO ============ -->
+    <section class="section" id="demo">
+      <div class="container">
+        <h2 class="section-title" data-i18n="demo.title">Интерактивное демо</h2>
+        <p class="section-sub" data-i18n="demo.sub">Попробуйте панель управления: тумблеры, шестерёнки, вкладки, старт/стоп — всё работает прямо в браузере.</p>
+        <div class="demo-frame-wrap">
+          <iframe class="demo-frame" src="demo.html" title="Demo" loading="lazy"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FEATURES ============ -->
+    <section class="section" id="features">
+      <div class="container">
+        <h2 class="section-title" data-i18n="features.title">Что внутри</h2>
+        <p class="section-sub" data-i18n="features.sub">Каждый модуль включается тумблером — ферма собирается под вашу схему.</p>
+
+        <div class="features-grid">
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 18v3M6 9l3 3-3 3M12 15h6"/></svg>
+            </div>
+            <h3 data-i18n="feature.yummyauto.title">YummyAuto-консоль</h3>
+            <p data-i18n="feature.yummyauto.text">Центральное управление мульти-фермой: запуск, остановка и контроль всех окон из одного места.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7M16 21h5v-5M21 21l-7-7M8 3H3v5M3 3l7 7"/></svg>
+            </div>
+            <h3 data-i18n="feature.smartswap.title">Smart-Swap</h3>
+            <p data-i18n="feature.smartswap.text">Смена IP и MAC-адреса по расписанию или слотам. Каждый инстанс живёт в своей сети.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+            </div>
+            <h3 data-i18n="feature.placeid.title">Смена PlaceID</h3>
+            <p data-i18n="feature.placeid.text">Переключение игры на лету без перезапуска фермы — по расписанию или вручную.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            </div>
+            <h3 data-i18n="feature.antiafk.title">Anti-AFK</h3>
+            <p data-i18n="feature.antiafk.text">Защита от кика за бездействие: окна остаются «живыми» столько, сколько нужно.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12h6M12 9v6"/></svg>
+            </div>
+            <h3 data-i18n="feature.solver.title">Solver</h3>
+            <p data-i18n="feature.solver.text">Автоматическое прохождение проверок. Работает в связке с Anti-AFK и Cookie Checker.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+            </div>
+            <h3 data-i18n="feature.ramboost.title">RAM Boost</h3>
+            <p data-i18n="feature.ramboost.text">Контроль памяти и очистка по порогу — ферма не деградирует после суток работы.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 20 6v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <h3 data-i18n="feature.watchdog.title">Watchdog</h3>
+            <p data-i18n="feature.watchdog.text">Наблюдает за процессами и перезапускает упавшее. Ферма не останавливается из-за сбоя.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            </div>
+            <h3 data-i18n="feature.instsans.title">Instsans Control</h3>
+            <p data-i18n="feature.instsans.text">Управление инстансами: пачки, приоритеты, отложенный запуск окон через DelayOpen.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.3c-1.4 0-2.8-.3-4-1L3 20l1.3-4.4a8.1 8.1 0 0 1-1.3-4.1A8.4 8.4 0 0 1 11.5 3.2 8.4 8.4 0 0 1 21 11.5z"/></svg>
+            </div>
+            <h3 data-i18n="feature.discord.title">Discord и Telegram</h3>
+            <p data-i18n="feature.discord.text">Боты присылают статусы, скриншоты и алерты. Управляйте фермой прямо из чата.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+            </div>
+            <h3 data-i18n="feature.cookies.title">Cookie Manager</h3>
+            <p data-i18n="feature.cookies.text">Проверка и глобализация куки, локальные списки мёртвых и заблокированных аккаунтов.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13 5l-2 14"/></svg>
+            </div>
+            <h3 data-i18n="feature.zeropoint.title">ZeroPoint API</h3>
+            <p data-i18n="feature.zeropoint.text">Интеграция с внешними сервисами — по вашему явному действию, без фоновой активности.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3 data-i18n="feature.guard.title">Guard-защита</h3>
+            <p data-i18n="feature.guard.text">Лицензии с подписью Ed25519, привязка к железу, офлайн-режим с защитой от отката часов.</p>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECURITY ============ -->
+    <section class="section" id="security">
+      <div class="container">
+        <h2 class="section-title" data-i18n-html="security.title">Безопасность <span class="amber">по умолчанию</span></h2>
+        <p class="section-sub" data-i18n="security.sub">Защита лицензий вынесена в нативный бинарник — секретов в JS нет.</p>
+
+        <div class="security-grid">
+          <div class="security-item">
+            <h4 data-i18n="security.ed25519.title">Ed25519-подписи</h4>
+            <p data-i18n="security.ed25519.text">Лицензии подписываются асимметрично: приватный ключ только на сервере, в клиенте — публичный. Подделать токен нельзя.</p>
+          </div>
+          <div class="security-item">
+            <h4 data-i18n="security.hwid.title">Привязка к железу</h4>
+            <p data-i18n="security.hwid.text">Ключ активируется на один HWID. Сброс возможен раз в сутки и подтверждается подписью.</p>
+          </div>
+          <div class="security-item">
+            <h4 data-i18n="security.guard.title">Нативный Guard</h4>
+            <p data-i18n="security.guard.text">Проверка токена, часов и HWID выполняется в Go-бинарнике. Целостность бинарника контролируется хешем.</p>
+          </div>
+          <div class="security-item">
+            <h4 data-i18n="security.ratelimit.title">Rate-limit и туннель</h4>
+            <p data-i18n="security.ratelimit.text">Сервер слушает только локально, наружу — через Cloudflare Tunnel с лимитами запросов на IP.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="section" id="faq">
+      <div class="container container-narrow">
+        <h2 class="section-title" data-i18n="faq.title">Частые вопросы</h2>
+
+        <details class="faq-item">
+          <summary data-i18n="faq.q1">Как получить доступ?</summary>
+          <p data-i18n="faq.a1">Приложение распространяется по ключам. Введите ключ при первом запуске — лицензия привяжется к вашему ПК.</p>
+        </details>
+        <details class="faq-item">
+          <summary data-i18n="faq.q2">Что делать при смене компьютера?</summary>
+          <p data-i18n="faq.a2">В приложении есть сброс HWID — раз в сутки, с подтверждением подписью. Новая машина подхватит лицензию.</p>
+        </details>
+        <details class="faq-item">
+          <summary data-i18n="faq.q3">Приложение работает без интернета?</summary>
+          <p data-i18n="faq.a3">Да, есть офлайн-режим с защищённым счётчиком. Сервер нужен для активации и продления ключей.</p>
+        </details>
+        <details class="faq-item">
+          <summary data-i18n="faq.q4">Сколько окон можно держать?</summary>
+          <p data-i18n="faq.a4">Ограничение — только ресурсы вашего ПК. RAM Boost и Watchdog следят, чтобы ферма не деградировала.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ DOWNLOAD / CTA ============ -->
+    <section class="section" id="download">
+      <div class="container">
+        <div class="cta-card">
+          <h2 data-i18n="download.title">Готовы автоматизировать ферму?</h2>
+          <p data-i18n="download.sub">Свяжитесь с нами, чтобы получить ключ и сборку для Windows.</p>
+          <div class="hero-actions">
+            <a class="btn btn-amber" href="https://t.me/" target="_blank" rel="noopener" data-i18n="download.tg">Написать в Telegram</a>
+            <a class="btn btn-ghost" href="#discord" data-i18n="download.discord">Наш Discord</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span data-i18n="footer.copy">© 2026 AutomaticFermaPro · automaticferma.bid</span>
+      <span class="footer-dim" data-i18n="footer.dim">Не аффилировано с Roblox Corporation</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
