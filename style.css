@@ -176,7 +176,7 @@ a { color: var(--accent-amber); text-decoration: none; }
 .btn-sm { padding: 8px 18px; font-size: 13px; }
 
 /* ============ HERO ============ */
-.hero { padding: 96px 0 72px; }
+.hero { padding: 60px 0 72px; }
 
 .hero-inner {
   display: grid;
