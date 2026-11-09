@@ -162,7 +162,18 @@
   };
 
   function getLang() {
-    try { return localStorage.getItem(STORAGE_KEY) || 'ru'; } catch (e) { return 'ru'; }
+    var saved = null;
+    try { saved = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+    if (saved === 'ru' || saved === 'en') return saved;
+    var langs = [];
+    try {
+      if (navigator.languages && navigator.languages.length) langs = navigator.languages;
+      else if (navigator.language) langs = [navigator.language];
+    } catch (e) {}
+    for (var i = 0; i < langs.length; i++) {
+      if (String(langs[i] || '').toLowerCase().indexOf('ru') === 0) return 'ru';
+    }
+    return 'en';
   }
 
   function currentLang() {
@@ -180,10 +191,12 @@
     return (dict && dict[key] != null) ? dict[key] : null;
   }
 
-  function applyLang(lang) {
+  function applyLang(lang, persist) {
     if (!translations[lang]) lang = 'ru';
     window.__afLang = lang;
-    try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
+    if (persist !== false) {
+      try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
+    }
     document.documentElement.lang = lang;
 
     document.querySelectorAll('[data-i18n]').forEach(function (el) {
@@ -270,7 +283,7 @@
     });
   });
 
-  applyLang(getLang());
+  applyLang(getLang(), false);
   initVideoFacade();
   initConnectBanner();
   fitDemoFrame();

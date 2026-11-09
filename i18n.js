@@ -1037,7 +1037,16 @@
     function getLang() {
         var v;
         try { v = localStorage.getItem(STORE_KEY); } catch (e) { v = null; }
-        return v === 'en' ? 'en' : 'ru';
+        if (v === 'en' || v === 'ru') return v;
+        var langs = [];
+        try {
+            if (navigator.languages && navigator.languages.length) langs = navigator.languages;
+            else if (navigator.language) langs = [navigator.language];
+        } catch (e) {}
+        for (var i = 0; i < langs.length; i++) {
+            if (String(langs[i] || '').toLowerCase().indexOf('ru') === 0) return 'ru';
+        }
+        return 'en';
     }
 
     function setLang(lang) {
