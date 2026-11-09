@@ -209,20 +209,26 @@
     });
   }
 
-  // 🔁 Connect-баннер: Volt → ZeroPoint по кругу
+  // 🔁 Connect-баннер: иконки 5с → надпись на их месте 2.5с → следующая пара
   function initConnectBanner() {
     var banner = document.getElementById('connect-banner');
     if (!banner) return;
     var scenes = qa('.cb-scene', banner);
-    if (scenes.length < 2) return;
+    if (!scenes.length) return;
     var cur = 0;
-    setInterval(function () {
-      scenes[cur].classList.remove('active');
-      cur = (cur + 1) % scenes.length;
-      var next = scenes[cur];
-      void next.offsetWidth;
-      next.classList.add('active');
-    }, 6000);
+    var ICONS_MS = 5000, CAPTION_MS = 2500;
+    function runScene() {
+      var scene = scenes[cur];
+      void scene.offsetWidth;
+      scene.classList.add('active');
+      setTimeout(function () { scene.classList.add('cb-caption-on'); }, ICONS_MS);
+      setTimeout(function () {
+        scene.classList.remove('active', 'cb-caption-on');
+        cur = (cur + 1) % scenes.length;
+        runScene();
+      }, ICONS_MS + CAPTION_MS);
+    }
+    runScene();
   }
 
   // ▶️ Видео-превью: клик — подгружаем YouTube-iframe с автоплеем
