@@ -231,8 +231,9 @@ a { color: var(--accent-amber); text-decoration: none; }
 
 .lead {
   font-size: 17px;
-  max-width: 520px;
+  max-width: none;
   margin: 0 0 28px;
+  white-space: nowrap;
 }
 
 .hero-actions {
@@ -360,10 +361,31 @@ a { color: var(--accent-amber); text-decoration: none; }
 }
 
 /* ============ VIDEO ============ */
+.video-wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+/* Заголовок-строка: растянут ровно на ширину видео (SVG textLength) */
+.video-title-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: 18px;
+  overflow: visible;
+}
+
+.video-title-svg text {
+  fill: var(--text-main);
+  font-size: 32px;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: 0;
+}
+
 .video-frame {
   position: relative;
-  max-width: 1080px;
-  margin: 34px auto 0;
+  width: 100%;
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid var(--accent-amber-border);
@@ -670,6 +692,7 @@ a { color: var(--accent-amber); text-decoration: none; }
 @media (max-width: 900px) {
   .hero-title-row { flex-direction: column; gap: 12px; }
   .hero-title-row .badge { position: static; transform: none; }
+  .lead { white-space: normal; }
 }
 
 @media (max-width: 600px) {
