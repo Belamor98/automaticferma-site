@@ -176,7 +176,26 @@ a { color: var(--accent-amber); text-decoration: none; }
 .btn-sm { padding: 8px 18px; font-size: 13px; }
 
 /* ============ HERO ============ */
-.hero { padding: 60px 0 72px; }
+.hero {
+  padding: 60px 0 72px;
+  position: relative;
+}
+
+/* Сетка из квадратиков (как в интро-лого) */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(251, 191, 36, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(251, 191, 36, 0.06) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%);
+  pointer-events: none;
+}
+
+.hero .container { position: relative; z-index: 1; }
 
 .hero-inner {
   display: grid;
