@@ -209,6 +209,22 @@
     });
   }
 
+  // 🔁 Connect-баннер: Volt → ZeroPoint по кругу
+  function initConnectBanner() {
+    var banner = document.getElementById('connect-banner');
+    if (!banner) return;
+    var scenes = qa('.cb-scene', banner);
+    if (scenes.length < 2) return;
+    var cur = 0;
+    setInterval(function () {
+      scenes[cur].classList.remove('active');
+      cur = (cur + 1) % scenes.length;
+      var next = scenes[cur];
+      void next.offsetWidth;
+      next.classList.add('active');
+    }, 6000);
+  }
+
   // ▶️ Видео-превью: клик — подгружаем YouTube-iframe с автоплеем
   function initVideoFacade() {
     var frame = document.getElementById('video-frame');
@@ -250,6 +266,7 @@
 
   applyLang(getLang());
   initVideoFacade();
+  initConnectBanner();
   fitDemoFrame();
   window.addEventListener('resize', fitDemoFrame);
   window.addEventListener('load', fitDemoFrame);
