@@ -177,15 +177,17 @@ a { color: var(--accent-amber); text-decoration: none; }
 
 /* ============ HERO ============ */
 .hero {
-  padding: 60px 0 72px;
+  padding: 60px 0 12px;
   position: relative;
 }
 
-/* Сетка из квадратиков (как в интро-лого) */
-.hero::before {
+/* Сетка из квадратиков на всём сайте: фиксированный слой,
+   радиально расходится от центра экрана к краям на любой высоте прокрутки */
+body::before {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
+  z-index: -1;
   background-image:
     linear-gradient(rgba(251, 191, 36, 0.06) 1px, transparent 1px),
     linear-gradient(90deg, rgba(251, 191, 36, 0.06) 1px, transparent 1px);
@@ -194,8 +196,6 @@ a { color: var(--accent-amber); text-decoration: none; }
   mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%);
   pointer-events: none;
 }
-
-.hero .container { position: relative; z-index: 1; }
 
 .hero-inner {
   display: grid;
@@ -251,7 +251,7 @@ a { color: var(--accent-amber); text-decoration: none; }
 .lead {
   font-size: 17px;
   max-width: none;
-  margin: 0 0 28px;
+  margin: 0 0 18px;
   white-space: nowrap;
 }
 
@@ -380,6 +380,9 @@ a { color: var(--accent-amber); text-decoration: none; }
 }
 
 /* ============ VIDEO ============ */
+/* Компактно: видео идёт сразу за hero-баннером */
+#video.section { padding-top: 28px; }
+
 .video-wrap {
   max-width: 1080px;
   margin: 0 auto;
@@ -513,12 +516,12 @@ a { color: var(--accent-amber); text-decoration: none; }
 }
 
 /* ============ CONNECT BANNER (Volt / ZeroPoint) ============ */
-/* Без фона: между заголовком и видео, иконки -> надпись на их месте */
+/* Без фона: под lead в hero, иконки -> надпись на их месте */
 .connect-banner {
   position: relative;
   max-width: 1080px;
-  margin: 4px auto 10px;
-  height: 235px;
+  margin: 0 auto;
+  height: 190px;
 }
 
 .cb-scene {
@@ -700,7 +703,7 @@ a { color: var(--accent-amber); text-decoration: none; }
 }
 
 @media (max-width: 700px) {
-  .connect-banner { height: 200px; }
+  .connect-banner { height: 170px; }
   .cb-auto-icon, .cb-partner-square img { width: 64px; height: 64px; }
   .cb-partner-wide img { width: 140px; height: 42px; }
   .cb-line { width: 80px; margin-top: 30px; }
@@ -910,7 +913,7 @@ a { color: var(--accent-amber); text-decoration: none; }
 }
 
 @media (max-width: 600px) {
-  .hero { padding: 64px 0 48px; }
+  .hero { padding: 64px 0 12px; }
   .hero h1 { font-size: 30px; }
   .features-grid { grid-template-columns: 1fr; }
   .security-grid { grid-template-columns: 1fr; }
