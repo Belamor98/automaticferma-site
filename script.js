@@ -213,7 +213,7 @@
   function initConnectBanner() {
     var banner = document.getElementById('connect-banner');
     if (!banner) return;
-    var scenes = qa('.cb-scene', banner);
+    var scenes = Array.prototype.slice.call(banner.querySelectorAll('.cb-scene'));
     if (!scenes.length) return;
     var cur = 0;
     var ICONS_MS = 5000, CAPTION_MS = 2500;
