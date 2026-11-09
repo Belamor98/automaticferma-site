@@ -193,7 +193,6 @@ a { color: var(--accent-amber); text-decoration: none; }
 .hero-stats { justify-content: center; }
 
 .badge {
-  align-self: flex-start;
   display: inline-block;
   padding: 6px 14px;
   border-radius: 999px;
@@ -204,6 +203,23 @@ a { color: var(--accent-amber); text-decoration: none; }
   font-weight: 600;
   letter-spacing: 0.4px;
   margin-bottom: 20px;
+  white-space: nowrap;
+}
+
+/* Badge в одной строке с заголовком: слева, заголовок держит центр */
+.hero-title-row {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-title-row .badge {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-bottom: 0;
 }
 
 .hero h1 {
@@ -443,6 +459,12 @@ a { color: var(--accent-amber); text-decoration: none; }
   display: block;
 }
 
+/* Статы под видео */
+.video-stats {
+  margin-top: 38px;
+  justify-content: center;
+}
+
 @media (max-width: 600px) {
   .video-caption { font-size: 13px; padding: 30px 14px 10px; }
   .video-play { width: 60px; height: 60px; }
@@ -643,6 +665,11 @@ a { color: var(--accent-amber); text-decoration: none; }
   .features-grid { grid-template-columns: repeat(2, 1fr); }
   .security-grid { grid-template-columns: repeat(2, 1fr); }
   .nav { display: none; }
+}
+
+@media (max-width: 900px) {
+  .hero-title-row { flex-direction: column; gap: 12px; }
+  .hero-title-row .badge { position: static; transform: none; }
 }
 
 @media (max-width: 600px) {
